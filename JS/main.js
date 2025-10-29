@@ -35,7 +35,7 @@ function addToDo(event) {
     // Create LI
     const newToDo = document.createElement('li');
     if (toDoInput.value === '') {
-            alert("You must write something!");
+            alert("必须输入内容！");
         } 
     else {
         // newToDo.innerText = "hey";
@@ -68,32 +68,31 @@ function addToDo(event) {
 
 
 function deletecheck(event){
-
-    // console.log(event.target);
     const item = event.target;
 
-    // delete
-    if(item.classList[0] === 'delete-btn')
+    // delete - 支持点击按钮或图标
+    if(item.classList.contains('delete-btn') || item.parentElement.classList.contains('delete-btn'))
     {
-        // item.parentElement.remove();
+        const todo = item.classList.contains('delete-btn') ? item.parentElement : item.parentElement.parentElement;
+
         // animation
-        item.parentElement.classList.add("fall");
+        todo.classList.add("fall");
 
         //removing local todos;
-        removeLocalTodos(item.parentElement);
+        removeLocalTodos(todo);
 
-        item.parentElement.addEventListener('transitionend', function(){
-            item.parentElement.remove();
-        })
+        // 使用 setTimeout 确保动画完成后删除
+        setTimeout(function(){
+            todo.remove();
+        }, 800);
     }
 
-    // check
-    if(item.classList[0] === 'check-btn')
+    // check - 支持点击按钮或图标
+    if(item.classList.contains('check-btn') || item.parentElement.classList.contains('check-btn'))
     {
-        item.parentElement.classList.toggle("completed");
+        const todo = item.classList.contains('check-btn') ? item.parentElement : item.parentElement.parentElement;
+        todo.classList.toggle("completed");
     }
-
-
 }
 
 

@@ -12,6 +12,8 @@ body {
     font-family: 'Work Sans', sans-serif;
     min-height: 100vh;
     padding-top: 3%;
+    overflow-x: hidden;
+    overflow-y: visible;
 }
 
 /* Body light or darker themes */
@@ -245,11 +247,12 @@ form button {
     justify-content: center;
     align-items: center;
     max-width: 1200px;
+    overflow: visible;
 }
 
 .todo-list {
     min-width: 25%;
-    overflow: hidden;
+    overflow: visible;
     /* To remove the bullets of unordered list */
     list-style: none;
 }
@@ -311,15 +314,14 @@ form button {
 
 
 .completed {
-    transition: 0.2s;
     text-decoration: line-through;
     opacity: 0.5;
 }
 
-.fall {
-    transition: 0.5s;
-    transform: translateY(45rem) rotateZ(45deg);
-    opacity: 0;
+.todo.fall {
+    transform: translateY(100vh) rotateZ(120deg) !important;
+    opacity: 0 !important;
+    transition: all 0.8s cubic-bezier(0.55, 0.085, 0.68, 0.53) !important;
 }
 
 /* Responsive design */
