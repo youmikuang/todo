@@ -349,7 +349,11 @@ form button {
 
 @media only screen and (max-width: 400px) {
     #header {
-        font-size: 1.5rem;
+        font-size: 1.5rem !important;
+    }
+
+    h1{
+        font-size: 1.5rem !important;
     }
 
     #title {
