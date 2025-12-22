@@ -12,39 +12,61 @@
     box-sizing: border-box;
 }
 
+html {
+    height: 100%;
+    background: #d4f1ff;
+}
+
+html, body {
+    min-height: 100%;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+}
+
 body {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
     font-family: 'Work Sans', sans-serif;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0);
     min-height: 100vh;
-    padding-top: 3%;
-    overflow-x: hidden;
-    overflow-y: visible;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+}
+
+#app {
+    min-height: 100vh;
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
 }
 
 /* Body light or darker themes */
 .standard {
-    background-image: linear-gradient(100deg, #575656, #062e3f);
+    background: #062e3f;
     color: #ffdfdb;
     transition: 0.3s linear;
+    min-height: 100%;
+    min-height: 100dvh;
 }
 
 .light {
-    background-image: linear-gradient(100deg, #d4f1ff, #ffffff);
+    background: #d4f1ff;
     color: #1a150e;
     transition: 0.3s linear;
+    min-height: 100%;
+    min-height: 100dvh;
 }
 
 .darker {
-    background-image: linear-gradient(100deg, #001214, #001f29);
+    background: #001f29;
     color: white;
     transition: 0.3s linear;
+    min-height: 100%;
+    min-height: 100dvh;
 }
 
 #header, #form, #datetime {
     margin: 0 1rem;
-    min-height: 10vh;
     width: 100%;
 }
 
@@ -58,9 +80,9 @@ body {
     align-items: center;
     display: flex;
     flex-direction: column;
-    justify-content: space-around;
-    font-size: 3rem;
-    min-height: 25vh;
+    justify-content: center;
+    font-size: 2rem;
+    padding-top: 1rem;
     width: 100%;
 }
 
@@ -108,10 +130,11 @@ body {
     border-right: solid 3px rgba(0, 0, 0, 0.75);
     white-space: pre;
     overflow: hidden;
-    letter-spacing: 0.20rem;
-    margin-top: 50px;
-    margin-bottom: 20px;
-    max-width: 960px;
+    letter-spacing: 0.15rem;
+    margin-top: 20px;
+    margin-bottom: 10px;
+    max-width: 420px;
+    font-size: 2.5rem;
 }
 
 #title {
@@ -125,7 +148,7 @@ body {
 
 @keyframes animated-text{
     from{width: 0%;}
-    to{width: 960px;}
+    to{width: 800px;}
 }
 
 @keyframes animated-cursor{
@@ -147,16 +170,38 @@ form {
     width: 100%;
 }
 
+form.input-wrapper {
+    position: relative;
+    max-width: 500px;
+    width: 100%;
+    padding: 0;
+    margin: 15px auto;
+}
+
 form input {
-    padding: 10px;
+    padding: 12px 50px 12px 15px;
     font-size: 17px;
     border: none;
     outline: none;
-    border-top-left-radius: 17px;
-    border-bottom-left-radius: 17px;
-    max-width: 500px;
+    border-radius: 25px;
     transition: background-color 200ms ease-in-out;
     width: 100%;
+}
+
+form .todo-btn {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    min-width: unset;
 }
 
 /* Input themes */
@@ -238,14 +283,6 @@ button.darker-button {
 
 button.darker-button:hover {
     background-color: #001f29;
-}
-
-form button {
-    padding: 10px;
-    font-size: 17px;
-    border-top-right-radius: 15px;
-    border-bottom-right-radius: 15px;
-    min-width: 100px;
 }
 
 #myUnOrdList {
@@ -342,6 +379,7 @@ form button {
         margin-bottom: 10px;
         margin-top: 30px;
         max-width: 330px;
+        font-size: 1.9rem;
     }
 }
 
@@ -363,21 +401,39 @@ form button {
 }
 
 @media only screen and (max-width: 400px) {
-    form {
-        align-items: center;
-        flex-direction: column;
+    form.input-wrapper {
+        max-width: 90%;
     }
+}
 
-    form input {
-        border-radius: 17px;
-    }
+/* Pomodoro control button themes */
+.standard .control-btn {
+    background-color: rgb(247, 226, 223);
+    color: rgb(0, 0, 0);
+}
 
-    form button {
-        border-radius: 15px;
-        margin-top: 15px;
-        width: 50%;
-    }
-    form > button.light-button {
-        box-shadow: 0 0 5px lightgray;
-    }
+.standard .control-btn:hover {
+    background-color: white;
+    box-shadow: #fff8 0 0 10px;
+}
+
+.light .control-btn {
+    background-color: white;
+    color: #1a150e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.light .control-btn:hover {
+    background-color: #f0f0f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.darker .control-btn {
+    background-color: #002837;
+    color: white;
+}
+
+.darker .control-btn:hover {
+    background-color: #003a4d;
+    box-shadow: 0 0 10px rgba(0, 150, 200, 0.3);
 }

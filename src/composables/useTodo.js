@@ -1,9 +1,11 @@
 import { ref, computed } from 'vue'
 
+// 共享状态 - 在所有组件间共享
+const currentTheme = ref('light')
+
 export function useTodo() {
   const todos = ref([])
   const inputValue = ref('')
-  const currentTheme = ref('light')
   const currentDateTime = ref('')
 
   // 计算属性
@@ -35,11 +37,24 @@ export function useTodo() {
     localStorage.setItem('todos', JSON.stringify(todoTexts))
   }
 
+  // 主题背景色映射
+  const themeColors = {
+    standard: '#062e3f',
+    light: '#d4f1ff',
+    darker: '#001f29'
+  }
+
+  // 更新背景色
+  function updateBackgroundColor(theme) {
+    document.documentElement.style.background = themeColors[theme] || themeColors.light
+  }
+
   // 加载主题
   function loadTheme() {
     const saved = localStorage.getItem('savedTheme')
     currentTheme.value = saved || 'light'
     document.body.className = currentTheme.value
+    updateBackgroundColor(currentTheme.value)
   }
 
   // 切换主题
@@ -47,6 +62,7 @@ export function useTodo() {
     currentTheme.value = theme
     localStorage.setItem('savedTheme', theme)
     document.body.className = theme
+    updateBackgroundColor(theme)
   }
 
   // 添加待办
