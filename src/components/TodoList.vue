@@ -1,11 +1,13 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useTodo } from '@/composables/useTodo'
+import { usePomodoro } from '@/composables/usePomodoro'
 
 const {
   todos,
   inputValue,
   currentDateTime,
+  selectedTaskId,
   inputClass,
   buttonClass,
   titleClass,
@@ -13,9 +15,18 @@ const {
   addTodo,
   toggleComplete,
   deleteTodo,
+  selectTask,
   getTodoClass,
   init
 } = useTodo()
+
+const { getTaskStats, isRunning } = usePomodoro()
+
+// 计时中不允许切换任务
+function handleSelectTask(taskId) {
+  if (isRunning.value) return
+  selectTask(taskId)
+}
 
 onMounted(() => {
   init()
@@ -57,18 +68,24 @@ onMounted(() => {
         <div
           v-for="todo in todos"
           :key="todo.id"
-          :class="getTodoClass(todo)"
+          :class="[getTodoClass(todo), { 'selected-task': selectedTaskId === todo.id, 'disabled': isRunning }]"
+          @click="handleSelectTask(todo.id)"
         >
-          <li class="todo-item">{{ todo.text }}</li>
+          <li class="todo-item">
+            <span class="todo-text">{{ todo.text }}</span>
+            <span v-if="getTaskStats(todo.id).count > 0" class="task-stats">
+              <i class="fas fa-clock"></i> {{ getTaskStats(todo.id).count }}
+            </span>
+          </li>
           <button
             :class="['check-btn', buttonClass]"
-            @click="toggleComplete(todo)"
+            @click.stop="toggleComplete(todo)"
           >
             <i class="fas fa-check"></i>
           </button>
           <button
             :class="['delete-btn', buttonClass]"
-            @click="deleteTodo(todo)"
+            @click.stop="deleteTodo(todo)"
           >
             <i class="fas fa-trash"></i>
           </button>
@@ -85,5 +102,34 @@ onMounted(() => {
   align-items: center;
   width: 100%;
   padding: 1rem;
+}
+
+.todo-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.todo-text {
+  flex: 1;
+}
+
+.task-stats {
+  font-size: 0.75rem;
+  opacity: 0.7;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.selected-task {
+  outline: 2px solid currentColor;
+  outline-offset: -2px;
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 </style>

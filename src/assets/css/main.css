@@ -9,7 +9,7 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    /* box-sizing: border-box; */
 }
 
 html {
@@ -436,4 +436,68 @@ button.darker-button:hover {
 .darker .control-btn:hover {
     background-color: #003a4d;
     box-shadow: 0 0 10px rgba(0, 150, 200, 0.3);
+}
+
+/* Stats tab button themes */
+.standard .tab-btn {
+    background-color: rgba(247, 226, 223, 0.2);
+    color: #ffdfdb;
+}
+
+.standard .tab-btn.active {
+    background-color: rgb(247, 226, 223);
+    color: rgb(0, 0, 0);
+}
+
+.light .tab-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1a150e;
+}
+
+.light .tab-btn.active {
+    background-color: white;
+    color: #1a150e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.darker .tab-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.darker .tab-btn.active {
+    background-color: #002837;
+    color: white;
+}
+
+/* Stats metric button themes */
+.standard .metric-btn {
+    background-color: rgba(247, 226, 223, 0.2);
+    color: #ffdfdb;
+}
+
+.standard .metric-btn.active {
+    background-color: rgb(247, 226, 223);
+    color: rgb(0, 0, 0);
+}
+
+.light .metric-btn {
+    background-color: rgba(0, 0, 0, 0.05);
+    color: #1a150e;
+}
+
+.light .metric-btn.active {
+    background-color: white;
+    color: #1a150e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.darker .metric-btn {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+}
+
+.darker .metric-btn.active {
+    background-color: #002837;
+    color: white;
 }

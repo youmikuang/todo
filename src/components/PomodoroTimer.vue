@@ -2,22 +2,28 @@
 import { ref, onMounted, watch, nextTick, computed } from 'vue'
 import { usePomodoro } from '@/composables/usePomodoro'
 import { useTodo } from '@/composables/useTodo'
+import PomodoroStats from '@/components/PomodoroStats.vue'
+import * as XLSX from 'xlsx'
 
 const {
   displayTime,
   isRunning,
   completedPomodoros,
-  formattedTotalTime,
+  filteredCompletedPomodoros,
+  filteredTotalTime,
+  pomodoroHistory,
   toggleTimer,
   reset,
   setTime,
+  soundEnabled,
+  toggleSound,
   minutes: currentMinutes,
   seconds: currentSeconds,
   loadData,
   saveData
 } = usePomodoro()
 
-const { currentTheme } = useTodo()
+const { currentTheme, selectedTask, selectedTaskId, todos } = useTodo()
 
 // 根据主题计算选择器样式
 const pickerTheme = computed(() => {
@@ -54,6 +60,7 @@ const pickerTheme = computed(() => {
 })
 
 const isEditing = ref(false)
+const showChart = ref(false)
 const selectedMinutes = ref(25)
 const selectedSeconds = ref(0)
 const minutesRef = ref(null)
@@ -61,8 +68,8 @@ const secondsRef = ref(null)
 
 const ITEM_HEIGHT = 40
 
-// 生成分钟列表 0-59
-const minutesList = Array.from({ length: 60 }, (_, i) => i)
+// 生成分钟列表 0-60
+const minutesList = Array.from({ length: 61 }, (_, i) => i)
 // 生成秒列表 0-59
 const secondsList = Array.from({ length: 60 }, (_, i) => i)
 
@@ -96,12 +103,25 @@ function handleScrollEnd(type) {
 
   const scrollTop = ref.scrollTop
   const index = Math.round(scrollTop / ITEM_HEIGHT)
-  const maxIndex = 59
+  const maxIndex = type === 'minutes' ? 60 : 59
   const clampedIndex = Math.max(0, Math.min(index, maxIndex))
 
   if (type === 'minutes') {
     selectedMinutes.value = clampedIndex
+    // 如果是60分钟，秒数强制为0
+    if (clampedIndex === 60) {
+      selectedSeconds.value = 0
+      if (secondsRef.value) {
+        secondsRef.value.scrollTo({ top: 0, behavior: 'smooth' })
+      }
+    }
   } else {
+    // 如果当前是60分钟，秒数不能修改
+    if (selectedMinutes.value === 60) {
+      selectedSeconds.value = 0
+      ref.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
     selectedSeconds.value = clampedIndex
   }
 
@@ -138,6 +158,37 @@ function cancelEdit() {
   closePicker()
 }
 
+// 导出 Excel
+function exportToExcel() {
+  // 获取任务名称映射
+  const taskMap = {}
+  todos.value.forEach(t => {
+    taskMap[t.id] = t.text
+  })
+
+  // 准备导出数据
+  const data = pomodoroHistory.value.map(record => {
+    const date = new Date(record.timestamp)
+    const mins = Math.floor(record.duration / 60)
+    const secs = record.duration % 60
+    return {
+      '日期': date.toLocaleDateString('zh-CN'),
+      '时间': date.toLocaleTimeString('zh-CN'),
+      '时长': `${mins}:${String(secs).padStart(2, '0')}`,
+      '任务': record.taskId ? (taskMap[record.taskId] || '已删除任务') : '无'
+    }
+  })
+
+  // 创建工作簿
+  const ws = XLSX.utils.json_to_sheet(data)
+  const wb = XLSX.utils.book_new()
+  XLSX.utils.book_append_sheet(wb, ws, '番茄记录')
+
+  // 下载文件
+  const fileName = `番茄记录_${new Date().toLocaleDateString('zh-CN').replace(/\//g, '-')}.xlsx`
+  XLSX.writeFile(wb, fileName)
+}
+
 // 监听变化保存数据
 watch([completedPomodoros], () => {
   saveData()
@@ -154,7 +205,7 @@ onMounted(() => {
       <div
         class="time-display"
         @click="handleClick"
-        :title="isRunning ? '' : '双击修改时长'"
+        :title="isRunning ? '' : '点击修改时长'"
       >
         {{ displayTime }}
       </div>
@@ -247,6 +298,11 @@ onMounted(() => {
       </div>
     </Teleport>
 
+    <!-- 当前选中的任务 -->
+    <div class="current-task" :class="{ 'has-task': selectedTask }">
+      {{ selectedTask?.text || '&nbsp;' }}
+    </div>
+
     <div class="pomodoro-controls">
       <button class="control-btn" @click="toggleTimer">
         <i :class="isRunning ? 'fas fa-pause' : 'fas fa-play'"></i>
@@ -254,17 +310,28 @@ onMounted(() => {
       <button class="control-btn" @click="reset">
         <i class="fas fa-redo"></i>
       </button>
+      <button class="control-btn sound-btn" @click="toggleSound" :title="soundEnabled ? '关闭声音' : '开启声音'">
+        <i :class="soundEnabled ? 'fas fa-volume-up' : 'fas fa-volume-mute'"></i>
+      </button>
     </div>
 
-    <div class="pomodoro-stats">
+    <div class="pomodoro-stats" @click="showChart = !showChart">
       <div class="stat-item">
         <i class="fas fa-check-circle"></i>
-        <span>{{ completedPomodoros }}</span>
+        <span>{{ filteredCompletedPomodoros }}</span>
       </div>
       <div class="stat-item">
         <i class="fas fa-clock"></i>
-        <span>{{ formattedTotalTime }}</span>
+        <span>{{ filteredTotalTime }}</span>
       </div>
+      <i :class="['fas', showChart ? 'fa-chevron-up' : 'fa-chevron-down', 'toggle-icon']"></i>
+      <button class="export-btn" @click.stop="exportToExcel" title="导出Excel">
+        <i class="fas fa-download"></i>
+      </button>
+    </div>
+
+    <div class="chart-wrapper">
+      <PomodoroStats v-if="showChart" :taskId="selectedTaskId" />
     </div>
   </div>
 </template>
@@ -274,9 +341,40 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 2rem;
+  padding-top: 9rem;
   min-height: 300px;
+  height: 100%;
+  width: 80%;
+  overflow-y: auto;
+}
+
+.chart-wrapper {
+  width: 100%;
+  justify-content: center;
+}
+
+@media only screen and (max-width: 768px) {
+  .pomodoro {
+    justify-content: center;
+    padding-top: 2rem;
+  }
+}
+
+.current-task {
+  font-size: 2rem;
+  opacity: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-bottom: 0.5rem;
+  min-height: 2em;
+  transition: opacity 0.2s;
+}
+
+.current-task.has-task {
+  opacity: 0.6;
 }
 
 .pomodoro-timer {
@@ -284,9 +382,10 @@ onMounted(() => {
 }
 
 .time-display {
-  font-size: 5rem;
-  font-weight: 300;
+  font-size: 8rem;
+  font-weight: 500;
   cursor: pointer;
+  color: #000;
   user-select: none;
   letter-spacing: 0.1em;
   transition: opacity 0.2s;
@@ -303,11 +402,11 @@ onMounted(() => {
 }
 
 .control-btn {
-  width: 60px;
-  height: 60px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   border: none;
-  font-size: 1.5rem;
+  font-size: 1rem;
   cursor: pointer;
   transition: transform 0.2s, box-shadow 0.2s;
   display: flex;
@@ -327,6 +426,47 @@ onMounted(() => {
   display: flex;
   gap: 2rem;
   font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  transition: opacity 0.2s;
+  align-items: center;
+}
+
+.pomodoro-stats:hover {
+  opacity: 0.8;
+}
+
+.toggle-icon {
+  font-size: 0.8rem;
+  opacity: 0.5;
+  margin-left: 0.5rem;
+}
+
+.export-btn {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  opacity: 0.5;
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  margin-left: 0.5rem;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.export-btn:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+@media only screen and (max-width: 768px) {
+  .toggle-icon {
+    display: none;
+  }
+
+  .pomodoro-stats {
+    cursor: default;
+  }
 }
 
 .stat-item {

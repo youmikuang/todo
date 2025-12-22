@@ -32,7 +32,7 @@ import '@/assets/css/main.css'
 }
 
 .pomodoro-section {
-  flex: 1;
+  flex: 1.5;
   display: flex;
   align-items: center;
   justify-content: center;

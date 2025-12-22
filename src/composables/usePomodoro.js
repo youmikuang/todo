@@ -1,6 +1,13 @@
 import { ref, computed } from 'vue'
+import { useTodo } from './useTodo'
+
+// 共享的历史记录数据
+const pomodoroHistory = ref([])
+const soundEnabled = ref(true)
 
 export function usePomodoro() {
+  const { selectedTaskId } = useTodo()
+
   const minutes = ref(25)
   const seconds = ref(0)
   const isRunning = ref(false)
@@ -22,6 +29,29 @@ export function usePomodoro() {
   const formattedTotalTime = computed(() => {
     const hours = Math.floor(totalFocusTime.value / 3600)
     const mins = Math.floor((totalFocusTime.value % 3600) / 60)
+    if (hours > 0) {
+      return `${hours}h ${mins}m`
+    }
+    return `${mins}m`
+  })
+
+  // 根据选中任务过滤的番茄数
+  const filteredCompletedPomodoros = computed(() => {
+    if (selectedTaskId.value === null) {
+      return completedPomodoros.value
+    }
+    return pomodoroHistory.value.filter(h => h.taskId === selectedTaskId.value).length
+  })
+
+  // 根据选中任务过滤的专注时间
+  const filteredTotalTime = computed(() => {
+    if (selectedTaskId.value === null) {
+      return formattedTotalTime.value
+    }
+    const taskRecords = pomodoroHistory.value.filter(h => h.taskId === selectedTaskId.value)
+    const totalSeconds = taskRecords.reduce((sum, h) => sum + (h.duration || 0), 0)
+    const hours = Math.floor(totalSeconds / 3600)
+    const mins = Math.floor((totalSeconds % 3600) / 60)
     if (hours > 0) {
       return `${hours}h ${mins}m`
     }
@@ -74,17 +104,32 @@ export function usePomodoro() {
   function complete() {
     pause()
     completedPomodoros.value++
+    // 记录完成时间、时长和关联的任务
+    const duration = initialMinutes.value * 60 + initialSeconds.value
+    pomodoroHistory.value.push({
+      timestamp: Date.now(),
+      duration: duration,
+      taskId: selectedTaskId.value || null
+    })
     playSound()
     reset()
+    saveData()
   }
 
   function playSound() {
+    if (!soundEnabled.value) return
     try {
       const audio = new Audio('/Cuckoo.mp3')
       audio.play()
     } catch (e) {
       // 静默失败
     }
+  }
+
+  // 切换声音开关
+  function toggleSound() {
+    soundEnabled.value = !soundEnabled.value
+    saveData()
   }
 
   // 设置时间（双击编辑）
@@ -120,6 +165,10 @@ export function usePomodoro() {
       const data = JSON.parse(saved)
       completedPomodoros.value = data.completedPomodoros || 0
       totalFocusTime.value = data.totalFocusTime || 0
+      pomodoroHistory.value = data.history || []
+      if (data.soundEnabled !== undefined) {
+        soundEnabled.value = data.soundEnabled
+      }
       if (data.initialMinutes !== undefined) {
         initialMinutes.value = data.initialMinutes
         minutes.value = data.initialMinutes
@@ -136,9 +185,106 @@ export function usePomodoro() {
     localStorage.setItem('pomodoroData', JSON.stringify({
       completedPomodoros: completedPomodoros.value,
       totalFocusTime: totalFocusTime.value,
+      history: pomodoroHistory.value,
+      soundEnabled: soundEnabled.value,
       initialMinutes: initialMinutes.value,
       initialSeconds: initialSeconds.value
     }))
+  }
+
+  // 获取统计数据 (可按任务筛选)
+  function getStatsData(type = 'day', taskId = null) {
+    const now = new Date()
+    let history = pomodoroHistory.value
+
+    // 如果指定了任务ID，筛选该任务的记录
+    if (taskId !== null) {
+      history = history.filter(h => h.taskId === taskId)
+    }
+
+    if (type === 'day') {
+      // 本月每一天
+      const year = now.getFullYear()
+      const month = now.getMonth()
+      const daysInMonth = new Date(year, month + 1, 0).getDate()
+      const days = []
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(year, month, day)
+        date.setHours(0, 0, 0, 0)
+        const nextDate = new Date(year, month, day + 1)
+
+        const dayRecords = history.filter(h =>
+          h.timestamp >= date.getTime() && h.timestamp < nextDate.getTime()
+        )
+        const count = dayRecords.length
+        const duration = dayRecords.reduce((sum, h) => sum + (h.duration || 0), 0)
+
+        days.push({
+          label: `${day}`,
+          count,
+          duration: Math.round(duration / 60)
+        })
+      }
+      return { data: days, title: `${year}年${month + 1}月` }
+    } else if (type === 'week') {
+      // 最近4周
+      const weeks = []
+      for (let i = 3; i >= 0; i--) {
+        const endDate = new Date(now)
+        endDate.setDate(endDate.getDate() - i * 7)
+        endDate.setHours(23, 59, 59, 999)
+        const startDate = new Date(endDate)
+        startDate.setDate(startDate.getDate() - 6)
+        startDate.setHours(0, 0, 0, 0)
+
+        const weekRecords = history.filter(h =>
+          h.timestamp >= startDate.getTime() && h.timestamp <= endDate.getTime()
+        )
+        const count = weekRecords.length
+        const duration = weekRecords.reduce((sum, h) => sum + (h.duration || 0), 0)
+
+        weeks.push({
+          label: `第${4 - i}周`,
+          count,
+          duration: Math.round(duration / 60)
+        })
+      }
+      return { data: weeks, title: `${now.getFullYear()}年` }
+    } else {
+      // 本年1-12月
+      const year = now.getFullYear()
+      const months = []
+
+      for (let month = 0; month < 12; month++) {
+        const date = new Date(year, month, 1)
+        const nextMonth = new Date(year, month + 1, 1)
+
+        const monthRecords = history.filter(h =>
+          h.timestamp >= date.getTime() && h.timestamp < nextMonth.getTime()
+        )
+        const count = monthRecords.length
+        const duration = monthRecords.reduce((sum, h) => sum + (h.duration || 0), 0)
+
+        months.push({
+          label: `${month + 1}月`,
+          count,
+          duration: Math.round(duration / 60)
+        })
+      }
+      return { data: months, title: `${year}年` }
+    }
+  }
+
+  // 获取任务的总统计
+  function getTaskStats(taskId) {
+    const taskRecords = pomodoroHistory.value.filter(h => h.taskId === taskId)
+    const count = taskRecords.length
+    const duration = taskRecords.reduce((sum, h) => sum + (h.duration || 0), 0)
+    return {
+      count,
+      duration: Math.round(duration / 60) // 分钟
+    }
   }
 
   return {
@@ -147,13 +293,20 @@ export function usePomodoro() {
     isRunning,
     completedPomodoros,
     totalFocusTime,
+    pomodoroHistory,
+    soundEnabled,
     displayTime,
     formattedTotalTime,
+    filteredCompletedPomodoros,
+    filteredTotalTime,
     toggleTimer,
     reset,
     setTime,
+    toggleSound,
     parseTimeString,
     loadData,
-    saveData
+    saveData,
+    getStatsData,
+    getTaskStats
   }
 }

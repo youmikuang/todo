@@ -2,9 +2,10 @@ import { ref, computed } from 'vue'
 
 // 共享状态 - 在所有组件间共享
 const currentTheme = ref('light')
+const todos = ref([])
+const selectedTaskId = ref(null) // 当前选中的任务
 
 export function useTodo() {
-  const todos = ref([])
   const inputValue = ref('')
   const currentDateTime = ref('')
 
@@ -89,11 +90,25 @@ export function useTodo() {
   // 删除待办
   function deleteTodo(todo) {
     todo.falling = true
+    // 如果删除的是当前选中的任务，清除选中
+    if (selectedTaskId.value === todo.id) {
+      selectedTaskId.value = null
+    }
     setTimeout(() => {
       todos.value = todos.value.filter(t => t.id !== todo.id)
       saveTodos()
     }, 800)
   }
+
+  // 选择任务
+  function selectTask(taskId) {
+    selectedTaskId.value = selectedTaskId.value === taskId ? null : taskId
+  }
+
+  // 获取选中的任务
+  const selectedTask = computed(() => {
+    return todos.value.find(t => t.id === selectedTaskId.value) || null
+  })
 
   // 获取待办项样式类
   function getTodoClass(todo) {
@@ -118,6 +133,8 @@ export function useTodo() {
     inputValue,
     currentTheme,
     currentDateTime,
+    selectedTaskId,
+    selectedTask,
     inputClass,
     buttonClass,
     titleClass,
@@ -125,6 +142,7 @@ export function useTodo() {
     addTodo,
     toggleComplete,
     deleteTodo,
+    selectTask,
     getTodoClass,
     init
   }
