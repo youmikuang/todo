@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'Work Sans';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('@/assets/fonts/WorkSans-Light.woff2') format('woff2');
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -5,7 +13,6 @@
 }
 
 body {
-    /* #363532, rgb(88, 111, 112) */
     align-items: center;
     display: flex;
     flex-direction: column;
@@ -41,6 +48,12 @@ body {
     width: 100%;
 }
 
+.datetime-wrapper {
+    text-align: center;
+    width: 100%;
+    margin: 10px 0;
+}
+
 #header {
     align-items: center;
     display: flex;
@@ -65,11 +78,11 @@ body {
     border-radius: 100%;
     height: 35px;
     margin: 0 8px;
-    transition: tranform 150ms ease-in-out, box-shadow 200ms ease-in-out;
+    transition: transform 150ms ease-in-out, box-shadow 200ms ease-in-out;
     width: 35px;
 }
 
-.theme-selector:hover { 
+.theme-selector:hover {
     box-shadow: white 0 0 8px;
     cursor: pointer;
 }
@@ -94,41 +107,36 @@ body {
 #title {
     border-right: solid 3px rgba(0, 0, 0, 0.75);
     white-space: pre;
-    overflow: hidden;     
+    overflow: hidden;
     letter-spacing: 0.20rem;
     margin-top: 50px;
     margin-bottom: 20px;
     max-width: 960px;
-  }
-  
-  /* Animation */
+}
+
 #title {
     animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
         animated-cursor 750ms steps(11,end) infinite;
-  }
+}
 
 #title.darker-title {
     animation: animated-text 2s steps(11,end) 0.5s 1 normal both, darker-animated-cursor 750ms steps(11,end) infinite;
 }
-  
-  /* text animation */
-  
-  @keyframes animated-text{
+
+@keyframes animated-text{
     from{width: 0%;}
     to{width: 960px;}
-  }
-  
-  /* cursor animations */
-  
-  @keyframes animated-cursor{
+}
+
+@keyframes animated-cursor{
     from{border-right-color: rgba(0, 0, 0, 0.75);}
     to{border-right-color: transparent;}
-  }
+}
 
-  @keyframes darker-animated-cursor {
+@keyframes darker-animated-cursor {
     from{border-right-color: #01394c;}
     to{border-right-color: transparent;}
-  }
+}
 
 form {
     display: flex;
@@ -144,7 +152,6 @@ form input {
     font-size: 17px;
     border: none;
     outline: none;
-    /* border-radius: 15; */
     border-top-left-radius: 17px;
     border-bottom-left-radius: 17px;
     max-width: 500px;
@@ -157,7 +164,6 @@ form input.standard-input {
     background-color: #181a1a;
     color: rgb(247, 226, 223);
 }
-
 
 form input.light-input {
     background-color: #AEB1B4;
@@ -197,7 +203,7 @@ form input.darker-input:hover {
 
 button {
     border: none;
-    outline: none; 
+    outline: none;
     transition: box-shadow 200ms ease, background-color 200ms ease-in-out;
 }
 
@@ -253,14 +259,11 @@ form button {
 .todo-list {
     min-width: 25%;
     overflow: visible;
-    /* To remove the bullets of unordered list */
     list-style: none;
 }
 
 .todo {
     margin: 1rem;
-    /* background: rgb(247, 226, 223); */
-    /* color: black; */
     font-size: 19px;
     display: flex;
     justify-content: space-between;
@@ -285,13 +288,9 @@ form button {
 
 .todo li{
     padding: 7px;
-    /* word-wrap: break-word; */
-    /* flex-wrap: wrap; */
     font-size: 20px;
-    flex: 1; /* To push the trash and the check button to the right */
+    flex: 1;
     border-radius: 30px;
-
-    /* wraps the links */
     overflow-wrap: anywhere;
 }
 
@@ -308,10 +307,9 @@ form button {
     padding: 0rem 0.5rem;
 }
 
-.fa-trash, .fa-check { 
+.fa-trash, .fa-check {
     pointer-events: none;
 }
-
 
 .completed {
     text-decoration: line-through;
@@ -338,7 +336,7 @@ form button {
     }
 
     #title {
-        animation: 
+        animation:
             animated-text 3s steps(16,end) 0.5s 1 normal both,
             animated-cursor 750ms steps(16,end) infinite;
         margin-bottom: 10px;
@@ -357,7 +355,7 @@ form button {
     }
 
     #title {
-        animation: 
+        animation:
             animated-text 3.5s steps(16,end) 0.5s 1 normal both,
             animated-cursor 750ms steps(16,end) infinite;
         max-width: 255px;
