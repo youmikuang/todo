@@ -102,6 +102,7 @@ onMounted(() => {
   align-items: center;
   width: 100%;
   padding: 1rem;
+  box-sizing: border-box;
 }
 
 .todo-item {
@@ -109,27 +110,53 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .todo-text {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .task-stats {
-  font-size: 0.75rem;
-  opacity: 0.7;
+  font-size: 0.7rem;
+  opacity: 0.6;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.2rem;
+  white-space: nowrap;
 }
 
 .selected-task {
   outline: 2px solid currentColor;
   outline-offset: -2px;
+  border-radius: 12px;
 }
 
 .disabled {
-  cursor: not-allowed;
-  opacity: 0.6;
+  cursor: not-allowed !important;
+  opacity: 0.5;
+}
+
+@media only screen and (max-width: 768px) {
+  .todo-container {
+    padding: 0.75rem;
+  }
+
+  .todo-item {
+    gap: 0.3rem;
+  }
+
+  .task-stats {
+    font-size: 0.6rem;
+  }
+
+  .selected-task {
+    outline-width: 1.5px;
+    border-radius: 10px;
+  }
 }
 </style>

@@ -1,16 +1,16 @@
 import { ref, computed } from 'vue'
 import { useTodo } from './useTodo'
 
-// 共享的历史记录数据
+// 共享的状态数据
 const pomodoroHistory = ref([])
 const soundEnabled = ref(true)
+const isRunning = ref(false)
 
 export function usePomodoro() {
   const { selectedTaskId } = useTodo()
 
   const minutes = ref(25)
   const seconds = ref(0)
-  const isRunning = ref(false)
   const completedPomodoros = ref(0)
   const totalFocusTime = ref(0) // 总专注时间（秒）
   const initialMinutes = ref(25)

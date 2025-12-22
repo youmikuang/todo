@@ -288,60 +288,93 @@ button.darker-button:hover {
 #myUnOrdList {
     display: flex;
     justify-content: center;
-    align-items: center;
-    max-width: 1200px;
-    overflow: visible;
+    align-items: flex-start;
+    width: 100%;
 }
 
 .todo-list {
-    min-width: 25%;
-    overflow: visible;
+    width: 100%;
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
 .todo {
-    margin: 1rem;
-    font-size: 19px;
+    margin: 0.5rem 0;
+    font-size: 15px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0.25em 0.5em;
-    border-radius: 30px;
-    transition: background-color 200ms ease-in-out;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    transition: all 200ms ease-in-out;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.todo:hover {
+    opacity: 0.9;
 }
 
 /* Items themes */
 .standard-todo {
-    background-color: rgb(26, 27, 27);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.standard-todo:hover {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 .light-todo {
-    background-color:#AEB1B4;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.light-todo:hover {
+    background-color: rgba(0, 0, 0, 0.08);
 }
 
 .darker-todo {
-    background-color: #01394c;
+    background-color: rgba(255, 255, 255, 0.08);
 }
 
-.todo li{
-    padding: 7px;
-    font-size: 20px;
+.darker-todo:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+}
+
+.todo li {
+    padding: 0;
+    font-size: 14px;
     flex: 1;
-    border-radius: 30px;
+    min-width: 0;
+    border-radius: 0;
     overflow-wrap: anywhere;
+    list-style: none;
 }
 
 .check-btn, .delete-btn {
-    font-size: 19px;
+    font-size: 12px;
     cursor: pointer;
-    width: 2em;
-    height: 2em;
-    border-radius: 80%;
-    margin: 0 5px;
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 8px;
+    margin-left: 6px;
+    border: none;
+    opacity: 0.5;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.check-btn:hover, .delete-btn:hover {
+    opacity: 1;
 }
 
 .todo-item {
-    padding: 0rem 0.5rem;
+    padding: 0;
+    min-width: 0;
+    overflow: hidden;
 }
 
 .fa-trash, .fa-check {
@@ -360,6 +393,31 @@ button.darker-button:hover {
 }
 
 /* Responsive design */
+@media only screen and (max-width: 768px) {
+    .todo-list {
+        padding: 0;
+    }
+
+    .todo {
+        margin: 0.4rem 0;
+        padding: 0.6rem 0.75rem;
+        border-radius: 10px;
+    }
+
+    .todo li {
+        font-size: 13px;
+    }
+
+    .check-btn, .delete-btn {
+        width: 26px;
+        height: 26px;
+        min-width: 26px;
+        font-size: 11px;
+        margin-left: 4px;
+        opacity: 0.7;
+    }
+}
+
 @media only screen and (max-width: 1000px) {
     .flexrow-container {
         align-self: unset;

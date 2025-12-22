@@ -189,6 +189,12 @@ function exportToExcel() {
   XLSX.writeFile(wb, fileName)
 }
 
+// 切换图表显示（仅PC端）
+function toggleChart() {
+  if (window.innerWidth <= 768) return
+  showChart.value = !showChart.value
+}
+
 // 监听变化保存数据
 watch([completedPomodoros], () => {
   saveData()
@@ -315,7 +321,7 @@ onMounted(() => {
       </button>
     </div>
 
-    <div class="pomodoro-stats" @click="showChart = !showChart">
+    <div class="pomodoro-stats" @click="toggleChart">
       <div class="stat-item">
         <i class="fas fa-check-circle"></i>
         <span>{{ filteredCompletedPomodoros }}</span>
@@ -385,7 +391,6 @@ onMounted(() => {
   font-size: 8rem;
   font-weight: 500;
   cursor: pointer;
-  color: #000;
   user-select: none;
   letter-spacing: 0.1em;
   transition: opacity 0.2s;
@@ -466,6 +471,14 @@ onMounted(() => {
 
   .pomodoro-stats {
     cursor: default;
+  }
+
+  .pomodoro-timer {
+    margin-top: 2rem;
+  }
+
+  .time-display {
+    font-size: 5rem;
   }
 }
 
