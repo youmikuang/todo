@@ -5,18 +5,17 @@ import { useTodo } from './useTodo'
 const pomodoroHistory = ref([])
 const soundEnabled = ref(true)
 const isRunning = ref(false)
+const minutes = ref(25)
+const seconds = ref(0)
+const completedPomodoros = ref(0)
+const totalFocusTime = ref(0)
+const initialMinutes = ref(25)
+const initialSeconds = ref(0)
+
+let timer = null
 
 export function usePomodoro() {
   const { selectedTaskId } = useTodo()
-
-  const minutes = ref(25)
-  const seconds = ref(0)
-  const completedPomodoros = ref(0)
-  const totalFocusTime = ref(0) // 总专注时间（秒）
-  const initialMinutes = ref(25)
-  const initialSeconds = ref(0)
-
-  let timer = null
 
   // 显示时间
   const displayTime = computed(() => {
@@ -72,14 +71,17 @@ export function usePomodoro() {
       reset()
     }
     isRunning.value = true
+    saveData()
     timer = setInterval(() => {
       if (seconds.value > 0) {
         seconds.value--
         totalFocusTime.value++
+        saveData()
       } else if (minutes.value > 0) {
         minutes.value--
         seconds.value = 59
         totalFocusTime.value++
+        saveData()
       } else {
         // 计时结束
         complete()
@@ -93,12 +95,14 @@ export function usePomodoro() {
       clearInterval(timer)
       timer = null
     }
+    saveData()
   }
 
   function reset() {
     pause()
     minutes.value = initialMinutes.value
     seconds.value = initialSeconds.value
+    saveData()
   }
 
   function complete() {
@@ -171,11 +175,24 @@ export function usePomodoro() {
       }
       if (data.initialMinutes !== undefined) {
         initialMinutes.value = data.initialMinutes
-        minutes.value = data.initialMinutes
       }
       if (data.initialSeconds !== undefined) {
         initialSeconds.value = data.initialSeconds
-        seconds.value = data.initialSeconds
+      }
+      // 恢复当前计时器状态
+      if (data.currentMinutes !== undefined) {
+        minutes.value = data.currentMinutes
+      } else {
+        minutes.value = initialMinutes.value
+      }
+      if (data.currentSeconds !== undefined) {
+        seconds.value = data.currentSeconds
+      } else {
+        seconds.value = initialSeconds.value
+      }
+      // 如果之前在计时，自动继续
+      if (data.wasRunning) {
+        start()
       }
     }
   }
@@ -188,7 +205,10 @@ export function usePomodoro() {
       history: pomodoroHistory.value,
       soundEnabled: soundEnabled.value,
       initialMinutes: initialMinutes.value,
-      initialSeconds: initialSeconds.value
+      initialSeconds: initialSeconds.value,
+      currentMinutes: minutes.value,
+      currentSeconds: seconds.value,
+      wasRunning: isRunning.value
     }))
   }
 

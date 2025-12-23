@@ -28,6 +28,12 @@ function handleSelectTask(taskId) {
   selectTask(taskId)
 }
 
+// 计时中不允许删除选中的任务
+function handleDeleteTodo(todo) {
+  if (isRunning.value && selectedTaskId.value === todo.id) return
+  deleteTodo(todo)
+}
+
 onMounted(() => {
   init()
 })
@@ -84,8 +90,9 @@ onMounted(() => {
             <i class="fas fa-check"></i>
           </button>
           <button
+            v-show="!(isRunning && selectedTaskId === todo.id)"
             :class="['delete-btn', buttonClass]"
-            @click.stop="deleteTodo(todo)"
+            @click.stop="handleDeleteTodo(todo)"
           >
             <i class="fas fa-trash"></i>
           </button>

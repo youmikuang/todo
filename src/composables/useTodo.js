@@ -1,72 +1,89 @@
 import { ref, computed } from 'vue'
 
-// 共享状态 - 在所有组件间共享
+// 共享状态
 const currentTheme = ref('light')
 const todos = ref([])
-const selectedTaskId = ref(null) // 当前选中的任务
+const selectedTaskId = ref(null)
+
+// 主题背景色映射
+const themeColors = {
+  standard: '#062e3f',
+  light: '#d4f1ff',
+  darker: '#001f29'
+}
+
+// 模块加载时初始化数据
+function initData() {
+  // 加载主题
+  const savedTheme = localStorage.getItem('savedTheme')
+  currentTheme.value = savedTheme || 'light'
+  document.body.className = currentTheme.value
+  document.documentElement.style.background = themeColors[currentTheme.value] || themeColors.light
+
+  // 加载 todos
+  const savedTodos = localStorage.getItem('todos')
+  if (savedTodos) {
+    const data = JSON.parse(savedTodos)
+    if (Array.isArray(data) && data.length > 0) {
+      if (typeof data[0] === 'string') {
+        todos.value = data.map((text, index) => ({
+          id: Date.now() + index,
+          text,
+          completed: false,
+          falling: false
+        }))
+      } else {
+        todos.value = data.map(t => ({ ...t, falling: false }))
+      }
+    }
+  }
+
+  // 加载选中的任务
+  const savedTaskId = localStorage.getItem('selectedTaskId')
+  if (savedTaskId) {
+    const taskId = parseInt(savedTaskId)
+    if (todos.value.some(t => t.id === taskId)) {
+      selectedTaskId.value = taskId
+    } else {
+      localStorage.removeItem('selectedTaskId')
+    }
+  }
+}
+
+initData()
 
 export function useTodo() {
   const inputValue = ref('')
   const currentDateTime = ref('')
 
-  // 计算属性
   const inputClass = computed(() => `${currentTheme.value}-input`)
   const buttonClass = computed(() => `${currentTheme.value}-button`)
   const titleClass = computed(() => currentTheme.value === 'darker' ? 'darker-title' : '')
 
-  // 更新时间
+  const selectedTask = computed(() => {
+    return todos.value.find(t => t.id === selectedTaskId.value) || null
+  })
+
   function updateDateTime() {
     currentDateTime.value = new Date().toLocaleString()
   }
 
-  // 从 localStorage 加载数据
-  function loadTodos() {
-    const saved = localStorage.getItem('todos')
-    if (saved) {
-      todos.value = JSON.parse(saved).map((text, index) => ({
-        id: Date.now() + index,
-        text,
-        completed: false,
-        falling: false
-      }))
-    }
-  }
-
-  // 保存到 localStorage
   function saveTodos() {
-    const todoTexts = todos.value.filter(t => !t.falling).map(t => t.text)
-    localStorage.setItem('todos', JSON.stringify(todoTexts))
+    const todoData = todos.value.filter(t => !t.falling).map(t => ({
+      id: t.id,
+      text: t.text,
+      completed: t.completed
+    }))
+    localStorage.setItem('todos', JSON.stringify(todoData))
   }
 
-  // 主题背景色映射
-  const themeColors = {
-    standard: '#062e3f',
-    light: '#d4f1ff',
-    darker: '#001f29'
-  }
-
-  // 更新背景色
-  function updateBackgroundColor(theme) {
-    document.documentElement.style.background = themeColors[theme] || themeColors.light
-  }
-
-  // 加载主题
-  function loadTheme() {
-    const saved = localStorage.getItem('savedTheme')
-    currentTheme.value = saved || 'light'
-    document.body.className = currentTheme.value
-    updateBackgroundColor(currentTheme.value)
-  }
-
-  // 切换主题
   function changeTheme(theme) {
     currentTheme.value = theme
     localStorage.setItem('savedTheme', theme)
     document.body.className = theme
-    updateBackgroundColor(theme)
+    document.documentElement.style.background = themeColors[theme] || themeColors.light
   }
 
-  // 添加待办
   function addTodo() {
     if (!inputValue.value.trim()) {
       alert('必须输入内容！')
@@ -82,17 +99,16 @@ export function useTodo() {
     inputValue.value = ''
   }
 
-  // 切换完成状态
   function toggleComplete(todo) {
     todo.completed = !todo.completed
+    saveTodos()
   }
 
-  // 删除待办
   function deleteTodo(todo) {
     todo.falling = true
-    // 如果删除的是当前选中的任务，清除选中
     if (selectedTaskId.value === todo.id) {
       selectedTaskId.value = null
+      localStorage.removeItem('selectedTaskId')
     }
     setTimeout(() => {
       todos.value = todos.value.filter(t => t.id !== todo.id)
@@ -100,17 +116,15 @@ export function useTodo() {
     }, 800)
   }
 
-  // 选择任务
   function selectTask(taskId) {
     selectedTaskId.value = selectedTaskId.value === taskId ? null : taskId
+    if (selectedTaskId.value !== null) {
+      localStorage.setItem('selectedTaskId', selectedTaskId.value.toString())
+    } else {
+      localStorage.removeItem('selectedTaskId')
+    }
   }
 
-  // 获取选中的任务
-  const selectedTask = computed(() => {
-    return todos.value.find(t => t.id === selectedTaskId.value) || null
-  })
-
-  // 获取待办项样式类
   function getTodoClass(todo) {
     return {
       'todo': true,
@@ -120,10 +134,7 @@ export function useTodo() {
     }
   }
 
-  // 初始化
   function init() {
-    loadTheme()
-    loadTodos()
     updateDateTime()
     setInterval(updateDateTime, 1000)
   }
