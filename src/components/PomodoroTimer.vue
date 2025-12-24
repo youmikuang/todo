@@ -402,12 +402,11 @@ onMounted(() => {
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 2rem;
   padding-top: 9rem;
   min-height: 300px;
   height: 100%;
   width: 80%;
-  overflow-y: auto;
+  overflow-y: display;
 }
 
 .chart-wrapper {

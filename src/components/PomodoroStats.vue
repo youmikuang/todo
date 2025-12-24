@@ -261,7 +261,7 @@ watch([pomodoroHistory, activeTimeTab, activeMetricTab, currentTheme, () => prop
 }
 
 .chart-container {
-  height: 400px;
+  height: 365px;
   width: 100%;
 }
 
