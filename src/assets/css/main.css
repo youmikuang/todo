@@ -169,18 +169,33 @@ body {
     letter-spacing: 0.15rem;
     margin-top: 20px;
     margin-bottom: 10px;
-    max-width: 420px;
-    font-size: 2.3rem;
+    max-width: 600px;
+    font-size: 4rem;
     text-align: center;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
 }
 
-#title {
+#title.standard-title {
+    background-image: linear-gradient(135deg, #ff6b6b, #ffd93d, #ff6b6b);
+    border-right-color: #ff6b6b;
     animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
-        animated-cursor 750ms steps(11,end) infinite;
+        standard-animated-cursor 750ms steps(11,end) infinite;
+}
+
+#title.light-title {
+    background-image: linear-gradient(135deg, #667eea, #764ba2, #667eea);
+    border-right-color: #667eea;
+    animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
+        light-animated-cursor 750ms steps(11,end) infinite;
 }
 
 #title.darker-title {
-    animation: animated-text 2s steps(11,end) 0.5s 1 normal both, darker-animated-cursor 750ms steps(11,end) infinite;
+    background-image: linear-gradient(135deg, #00d2ff, #3a7bd5, #00d2ff);
+    border-right-color: #00d2ff;
+    animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
+        darker-animated-cursor 750ms steps(11,end) infinite;
 }
 
 @keyframes animated-text{
@@ -188,14 +203,25 @@ body {
     to{width: 800px;}
 }
 
-@keyframes animated-cursor{
-    from{border-right-color: rgba(0, 0, 0, 0.75);}
+@keyframes standard-animated-cursor{
+    from{border-right-color: #ff6b6b;}
+    to{border-right-color: transparent;}
+}
+
+@keyframes light-animated-cursor{
+    from{border-right-color: #667eea;}
     to{border-right-color: transparent;}
 }
 
 @keyframes darker-animated-cursor {
-    from{border-right-color: #01394c;}
+    from{border-right-color: #00d2ff;}
     to{border-right-color: transparent;}
+}
+
+@media only screen and (min-width: 768px) and (max-width: 1024px) {
+    #title {
+        font-size: 2.3rem;
+    }
 }
 
 form {

@@ -89,7 +89,7 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <h1 id="title" :class="titleClass">好好学习，天天向上。</h1>
+    <h1 id="title" :class="titleClass">好好学习，天天向上</h1>
     <div id="form">
       <form @submit.prevent="addTodo" class="input-wrapper">
         <input

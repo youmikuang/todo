@@ -58,7 +58,7 @@ export function useTodo() {
 
   const inputClass = computed(() => `${currentTheme.value}-input`)
   const buttonClass = computed(() => `${currentTheme.value}-button`)
-  const titleClass = computed(() => currentTheme.value === 'darker' ? 'darker-title' : '')
+  const titleClass = computed(() => `${currentTheme.value}-title`)
 
   const selectedTask = computed(() => {
     return todos.value.find(t => t.id === selectedTaskId.value) || null
