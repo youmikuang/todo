@@ -19,11 +19,54 @@ const {
   toggleSound,
   minutes: currentMinutes,
   seconds: currentSeconds,
+  initialMinutes,
+  initialSeconds,
   loadData,
   saveData
 } = usePomodoro()
 
 const { currentTheme, selectedTask, selectedTaskId, todos } = useTodo()
+
+// 计算进度百分比 (0-100)
+const progress = computed(() => {
+  const total = initialMinutes.value * 60 + initialSeconds.value
+  if (total === 0) return 0
+  const current = currentMinutes.value * 60 + currentSeconds.value
+  return ((total - current) / total) * 100
+})
+
+// 根据主题获取进度条渐变色
+const progressGradient = computed(() => {
+  const gradients = {
+    standard: {
+      start: '#ff6b6b',
+      end: '#ffd93d',
+      bg: 'rgba(255, 255, 255, 0.1)'
+    },
+    light: {
+      start: '#667eea',
+      end: '#764ba2',
+      bg: 'rgba(102, 126, 234, 0.15)'
+    },
+    darker: {
+      start: '#00d2ff',
+      end: '#3a7bd5',
+      bg: 'rgba(0, 210, 255, 0.15)'
+    }
+  }
+  return gradients[currentTheme.value] || gradients.standard
+})
+
+// 计算渐变背景
+const borderBackground = computed(() => {
+  const g = progressGradient.value
+  const p = progress.value
+  if (p === 0) {
+    return g.bg
+  }
+  // 渐变进度条
+  return `conic-gradient(from 0deg, ${g.start} 0%, ${g.end} ${p}%, ${g.bg} ${p}%)`
+})
 
 // 根据主题计算选择器样式
 const pickerTheme = computed(() => {
@@ -208,12 +251,23 @@ onMounted(() => {
 <template>
   <div class="pomodoro">
     <div class="pomodoro-timer">
+      <!-- 进度条边框容器 -->
       <div
-        class="time-display"
-        @click="handleClick"
-        :title="isRunning ? '' : '点击修改时长'"
+        class="timer-border"
+        :style="{
+          background: borderBackground,
+          borderRadius: '100px'
+        }"
       >
-        {{ displayTime }}
+        <div class="timer-border-inner">
+          <div
+            class="time-display"
+            @click="handleClick"
+            :title="isRunning ? '' : '点击修改时长'"
+          >
+            {{ displayTime }}
+          </div>
+        </div>
       </div>
     </div>
 
@@ -387,6 +441,32 @@ onMounted(() => {
   margin-bottom: 2rem;
 }
 
+.timer-border {
+  padding: 10px;
+  min-width: 320px;
+}
+
+.timer-border-inner {
+  background: var(--timer-bg, #062e3f);
+  border-radius: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 2rem;
+}
+
+.standard .timer-border-inner {
+  background: #062e3f;
+}
+
+.light .timer-border-inner {
+  background: #d4f1ff;
+}
+
+.darker .timer-border-inner {
+  background: #001f29;
+}
+
 .time-display {
   font-size: 8rem;
   font-weight: 500;
@@ -394,6 +474,9 @@ onMounted(() => {
   user-select: none;
   letter-spacing: 0.1em;
   transition: opacity 0.2s;
+  font-variant-numeric: tabular-nums;
+  min-width: 5ch;
+  text-align: center;
 }
 
 .time-display:hover {

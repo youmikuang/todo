@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useTodo } from './useTodo'
 
 // 共享的状态数据
@@ -13,6 +13,26 @@ const initialMinutes = ref(25)
 const initialSeconds = ref(0)
 
 let timer = null
+let endTime = null // 计时器结束的目标时间
+const originalTitle = 'Todo'
+
+// 页面关闭前保存数据的处理函数
+function handleBeforeUnload() {
+  if (isRunning.value && endTime) {
+    localStorage.setItem('pomodoroData', JSON.stringify({
+      completedPomodoros: completedPomodoros.value,
+      totalFocusTime: totalFocusTime.value,
+      history: pomodoroHistory.value,
+      soundEnabled: soundEnabled.value,
+      initialMinutes: initialMinutes.value,
+      initialSeconds: initialSeconds.value,
+      currentMinutes: minutes.value,
+      currentSeconds: seconds.value,
+      wasRunning: isRunning.value,
+      endTime: endTime
+    }))
+  }
+}
 
 export function usePomodoro() {
   const { selectedTaskId } = useTodo()
@@ -66,35 +86,129 @@ export function usePomodoro() {
     }
   }
 
+  // 更新浏览器标题
+  function updateTitle() {
+    if (isRunning.value) {
+      document.title = `${displayTime.value} - Todo`
+    } else {
+      document.title = originalTitle
+    }
+  }
+
+  // 根据 endTime 更新剩余时间
+  function updateRemainingTime() {
+    if (!endTime || !isRunning.value) return
+
+    const now = Date.now()
+    const remaining = Math.max(0, endTime - now)
+
+    // 计算从上次更新到现在经过的时间
+    const prevTotal = minutes.value * 60 + seconds.value
+    const newTotalSeconds = Math.ceil(remaining / 1000)
+    const elapsed = prevTotal - newTotalSeconds
+    if (elapsed > 0) {
+      totalFocusTime.value += elapsed
+    }
+
+    if (remaining <= 0) {
+      complete()
+      return
+    }
+
+    minutes.value = Math.floor(newTotalSeconds / 60)
+    seconds.value = newTotalSeconds % 60
+    updateTitle()
+    saveData()
+  }
+
+  // 处理页面可见性变化
+  function handleVisibilityChange() {
+    if (document.hidden) {
+      // 页面隐藏时，清除定时器但保持 endTime
+      if (timer) {
+        clearInterval(timer)
+        timer = null
+      }
+    } else {
+      // 页面可见时，重新计算剩余时间并恢复定时器
+      if (isRunning.value && endTime) {
+        // 先清除可能存在的旧定时器
+        if (timer) {
+          clearInterval(timer)
+          timer = null
+        }
+        updateRemainingTime()
+        if (isRunning.value) {
+          // 如果还在运行，重新启动定时器
+          timer = setInterval(tick, 1000)
+        }
+      }
+      // 确保标题正确更新
+      updateTitle()
+    }
+  }
+
+  // 每秒执行的 tick 函数
+  function tick() {
+    if (!isRunning.value) return
+
+    const now = Date.now()
+    const remaining = Math.max(0, endTime - now)
+
+    if (remaining <= 0) {
+      complete()
+      return
+    }
+
+    const totalSeconds = Math.ceil(remaining / 1000)
+    const newMinutes = Math.floor(totalSeconds / 60)
+    const newSeconds = totalSeconds % 60
+
+    // 计算实际过去的秒数来更新 totalFocusTime
+    const prevTotal = minutes.value * 60 + seconds.value
+    const currTotal = newMinutes * 60 + newSeconds
+    const elapsed = prevTotal - currTotal
+    if (elapsed > 0) {
+      totalFocusTime.value += elapsed
+    }
+
+    minutes.value = newMinutes
+    seconds.value = newSeconds
+    updateTitle()
+    saveData()
+  }
+
   function start() {
     if (minutes.value === 0 && seconds.value === 0) {
       reset()
     }
     isRunning.value = true
+
+    // 计算结束时间
+    const totalSeconds = minutes.value * 60 + seconds.value
+    endTime = Date.now() + totalSeconds * 1000
+
+    // 添加页面可见性监听
+    document.removeEventListener('visibilitychange', handleVisibilityChange)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    // 添加页面关闭前保存数据的监听
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('beforeunload', handleBeforeUnload)
+
+    updateTitle()
     saveData()
-    timer = setInterval(() => {
-      if (seconds.value > 0) {
-        seconds.value--
-        totalFocusTime.value++
-        saveData()
-      } else if (minutes.value > 0) {
-        minutes.value--
-        seconds.value = 59
-        totalFocusTime.value++
-        saveData()
-      } else {
-        // 计时结束
-        complete()
-      }
-    }, 1000)
+    timer = setInterval(tick, 1000)
   }
 
   function pause() {
     isRunning.value = false
+    endTime = null
     if (timer) {
       clearInterval(timer)
       timer = null
     }
+    updateTitle()
     saveData()
   }
 
@@ -102,6 +216,7 @@ export function usePomodoro() {
     pause()
     minutes.value = initialMinutes.value
     seconds.value = initialSeconds.value
+    updateTitle()
     saveData()
   }
 
@@ -179,20 +294,45 @@ export function usePomodoro() {
       if (data.initialSeconds !== undefined) {
         initialSeconds.value = data.initialSeconds
       }
-      // 恢复当前计时器状态
-      if (data.currentMinutes !== undefined) {
-        minutes.value = data.currentMinutes
+
+      // 如果之前在计时且有保存的 endTime
+      if (data.wasRunning && data.endTime) {
+        const now = Date.now()
+        const remaining = data.endTime - now
+
+        if (remaining > 0) {
+          // 还有剩余时间，恢复计时
+          const totalSeconds = Math.ceil(remaining / 1000)
+          minutes.value = Math.floor(totalSeconds / 60)
+          seconds.value = totalSeconds % 60
+          endTime = data.endTime
+          isRunning.value = true
+
+          // 添加页面可见性监听
+          document.addEventListener('visibilitychange', handleVisibilityChange)
+          // 添加页面关闭前保存数据的监听
+          window.addEventListener('beforeunload', handleBeforeUnload)
+
+          updateTitle()
+          timer = setInterval(tick, 1000)
+        } else {
+          // 时间已经过了，完成计时
+          minutes.value = 0
+          seconds.value = 0
+          complete()
+        }
       } else {
-        minutes.value = initialMinutes.value
-      }
-      if (data.currentSeconds !== undefined) {
-        seconds.value = data.currentSeconds
-      } else {
-        seconds.value = initialSeconds.value
-      }
-      // 如果之前在计时，自动继续
-      if (data.wasRunning) {
-        start()
+        // 恢复当前计时器状态
+        if (data.currentMinutes !== undefined) {
+          minutes.value = data.currentMinutes
+        } else {
+          minutes.value = initialMinutes.value
+        }
+        if (data.currentSeconds !== undefined) {
+          seconds.value = data.currentSeconds
+        } else {
+          seconds.value = initialSeconds.value
+        }
       }
     }
   }
@@ -208,7 +348,8 @@ export function usePomodoro() {
       initialSeconds: initialSeconds.value,
       currentMinutes: minutes.value,
       currentSeconds: seconds.value,
-      wasRunning: isRunning.value
+      wasRunning: isRunning.value,
+      endTime: endTime
     }))
   }
 
@@ -319,6 +460,8 @@ export function usePomodoro() {
     formattedTotalTime,
     filteredCompletedPomodoros,
     filteredTotalTime,
+    initialMinutes,
+    initialSeconds,
     toggleTimer,
     reset,
     setTime,
