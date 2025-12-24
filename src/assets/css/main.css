@@ -125,6 +125,42 @@ body {
     background-image: linear-gradient(100deg, #001214, #001f29);
 }
 
+.fullscreen-btn {
+    width: 37px;
+    min-width: 37px;
+    height: 37px;
+    min-height: 37px;
+    border-radius: 100%;
+    border: 1px solid #d1dae3;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 8px;
+    transition: transform 150ms ease-in-out, box-shadow 200ms ease-in-out;
+    font-size: 20px;
+    opacity: 0.7;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.fullscreen-btn:hover {
+    box-shadow: white 0 0 8px;
+    opacity: 1;
+}
+
+.fullscreen-btn:active {
+    transform: scale(0.95);
+}
+
+@media only screen and (max-width: 768px) {
+    .fullscreen-btn {
+        display: none;
+    }
+}
+
 /* Animation */
 #title {
     border-right: solid 3px rgba(0, 0, 0, 0.75);
@@ -134,7 +170,8 @@ body {
     margin-top: 20px;
     margin-bottom: 10px;
     max-width: 420px;
-    font-size: 2.5rem;
+    font-size: 2.3rem;
+    text-align: center;
 }
 
 #title {
@@ -211,7 +248,8 @@ form input.standard-input {
 }
 
 form input.light-input {
-    background-color: #AEB1B4;
+    background-color: #d4f1ff;
+    border: 1px solid #919699;
     color: #1a150e;
 }
 
@@ -236,10 +274,6 @@ form input:hover {
 
 form input.standard-input:hover {
     background-color: rgb(0, 0, 0);
-}
-
-form input.light-input:hover {
-    background-color: #919699;
 }
 
 form input.darker-input:hover {
@@ -294,9 +328,10 @@ button.darker-button:hover {
 
 .todo-list {
     width: 100%;
+    max-width: 450px;
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 auto;
 }
 
 .todo {
@@ -306,7 +341,7 @@ button.darker-button:hover {
     justify-content: space-between;
     align-items: center;
     padding: 0.75rem 1rem;
-    border-radius: 12px;
+    border-radius: 15px;
     transition: all 200ms ease-in-out;
     cursor: pointer;
     box-sizing: border-box;

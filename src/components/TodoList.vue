@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useTodo } from '@/composables/useTodo'
 import { usePomodoro } from '@/composables/usePomodoro'
 
@@ -22,6 +22,36 @@ const {
 
 const { getTaskStats, isRunning } = usePomodoro()
 
+const isFullscreen = ref(false)
+
+// 切换全屏
+function toggleFullscreen() {
+  const elem = document.documentElement
+
+  if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+    // 进入全屏
+    if (elem.requestFullscreen) {
+      elem.requestFullscreen()
+    } else if (elem.webkitRequestFullscreen) {
+      // Safari / iOS
+      elem.webkitRequestFullscreen()
+    }
+  } else {
+    // 退出全屏
+    if (document.exitFullscreen) {
+      document.exitFullscreen()
+    } else if (document.webkitExitFullscreen) {
+      // Safari / iOS
+      document.webkitExitFullscreen()
+    }
+  }
+}
+
+// 监听全屏状态变化
+function handleFullscreenChange() {
+  isFullscreen.value = !!(document.fullscreenElement || document.webkitFullscreenElement)
+}
+
 // 计时中不允许切换任务
 function handleSelectTask(taskId) {
   if (isRunning.value) return
@@ -36,6 +66,13 @@ function handleDeleteTodo(todo) {
 
 onMounted(() => {
   init()
+  document.addEventListener('fullscreenchange', handleFullscreenChange)
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+})
+
+onUnmounted(() => {
+  document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
 })
 </script>
 
@@ -46,6 +83,9 @@ onMounted(() => {
         <div class="standard-theme theme-selector" @click="changeTheme('standard')"></div>
         <div class="light-theme theme-selector" @click="changeTheme('light')"></div>
         <div class="darker-theme theme-selector" @click="changeTheme('darker')"></div>
+        <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
+          <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
+        </button>
       </div>
     </div>
 
@@ -138,9 +178,8 @@ onMounted(() => {
 }
 
 .selected-task {
-  outline: 2px solid currentColor;
-  outline-offset: -2px;
-  border-radius: 12px;
+  box-shadow: inset 0 0 0 2px currentColor;
+  border-radius: 15px;
 }
 
 .disabled {
@@ -162,8 +201,7 @@ onMounted(() => {
   }
 
   .selected-task {
-    outline-width: 1.5px;
-    border-radius: 10px;
+    box-shadow: inset 0 0 0 1.5px currentColor;
   }
 }
 </style>
