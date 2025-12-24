@@ -12,9 +12,30 @@ const totalFocusTime = ref(0)
 const initialMinutes = ref(25)
 const initialSeconds = ref(0)
 
-let timer = null
 let endTime = null // 计时器结束的目标时间
 const originalTitle = 'Todo'
+
+// Web Worker 用于后台计时
+let timerWorker = null
+
+function getTimerWorker() {
+  if (!timerWorker) {
+    const workerCode = `
+      let timer = null
+      self.onmessage = function(e) {
+        if (e.data.type === 'start') {
+          if (timer) clearInterval(timer)
+          timer = setInterval(() => self.postMessage({ type: 'tick' }), 1000)
+        } else if (e.data.type === 'stop') {
+          if (timer) { clearInterval(timer); timer = null }
+        }
+      }
+    `
+    const blob = new Blob([workerCode], { type: 'application/javascript' })
+    timerWorker = new Worker(URL.createObjectURL(blob))
+  }
+  return timerWorker
+}
 
 // 页面关闭前保存数据的处理函数
 function handleBeforeUnload() {
@@ -123,28 +144,9 @@ export function usePomodoro() {
 
   // 处理页面可见性变化
   function handleVisibilityChange() {
-    if (document.hidden) {
-      // 页面隐藏时，清除定时器但保持 endTime
-      if (timer) {
-        clearInterval(timer)
-        timer = null
-      }
-    } else {
-      // 页面可见时，重新计算剩余时间并恢复定时器
-      if (isRunning.value && endTime) {
-        // 先清除可能存在的旧定时器
-        if (timer) {
-          clearInterval(timer)
-          timer = null
-        }
-        updateRemainingTime()
-        if (isRunning.value) {
-          // 如果还在运行，重新启动定时器
-          timer = setInterval(tick, 1000)
-        }
-      }
-      // 确保标题正确更新
-      updateTitle()
+    if (!document.hidden && isRunning.value && endTime) {
+      // 页面可见时，更新剩余时间
+      updateRemainingTime()
     }
   }
 
@@ -198,16 +200,21 @@ export function usePomodoro() {
 
     updateTitle()
     saveData()
-    timer = setInterval(tick, 1000)
+
+    // 使用 Web Worker 进行后台计时
+    const worker = getTimerWorker()
+    worker.onmessage = () => tick()
+    worker.postMessage({ type: 'start' })
   }
 
   function pause() {
     isRunning.value = false
     endTime = null
-    if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
+
+    // 停止 Web Worker
+    const worker = getTimerWorker()
+    worker.postMessage({ type: 'stop' })
+
     updateTitle()
     saveData()
   }
@@ -314,7 +321,11 @@ export function usePomodoro() {
           window.addEventListener('beforeunload', handleBeforeUnload)
 
           updateTitle()
-          timer = setInterval(tick, 1000)
+
+          // 使用 Web Worker 进行后台计时
+          const worker = getTimerWorker()
+          worker.onmessage = () => tick()
+          worker.postMessage({ type: 'start' })
         } else {
           // 时间已经过了，完成计时
           minutes.value = 0

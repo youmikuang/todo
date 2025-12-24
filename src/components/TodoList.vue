@@ -74,7 +74,7 @@ onMounted(() => {
         <div
           v-for="todo in todos"
           :key="todo.id"
-          :class="[getTodoClass(todo), { 'selected-task': selectedTaskId === todo.id, 'disabled': isRunning }]"
+          :class="[getTodoClass(todo), { 'selected-task': selectedTaskId === todo.id, 'disabled': isRunning && selectedTaskId !== todo.id }]"
           @click="handleSelectTask(todo.id)"
         >
           <li class="todo-item">
