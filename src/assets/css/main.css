@@ -17,6 +17,18 @@ html {
     background: #d4f1ff;
 }
 
+html.standard-html {
+    background: #062e3f;
+}
+
+html.light-html {
+    background: #d4f1ff;
+}
+
+html.darker-html {
+    background: #001f29;
+}
+
 html, body {
     min-height: 100%;
     min-height: 100dvh;
@@ -32,6 +44,19 @@ body {
     min-height: 100vh;
     min-height: 100dvh;
     min-height: -webkit-fill-available;
+    background: inherit;
+}
+
+body.standard {
+    background: #062e3f;
+}
+
+body.light {
+    background: #d4f1ff;
+}
+
+body.darker {
+    background: #001f29;
 }
 
 #app {

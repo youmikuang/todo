@@ -5,20 +5,13 @@ const currentTheme = ref('light')
 const todos = ref([])
 const selectedTaskId = ref(null)
 
-// 主题背景色映射
-const themeColors = {
-  standard: '#062e3f',
-  light: '#d4f1ff',
-  darker: '#001f29'
-}
-
 // 模块加载时初始化数据
 function initData() {
   // 加载主题
   const savedTheme = localStorage.getItem('savedTheme')
   currentTheme.value = savedTheme || 'light'
   document.body.className = currentTheme.value
-  document.documentElement.style.background = themeColors[currentTheme.value] || themeColors.light
+  document.documentElement.className = `${currentTheme.value}-html`
 
   // 加载 todos
   const savedTodos = localStorage.getItem('todos')
@@ -81,7 +74,7 @@ export function useTodo() {
     currentTheme.value = theme
     localStorage.setItem('savedTheme', theme)
     document.body.className = theme
-    document.documentElement.style.background = themeColors[theme] || themeColors.light
+    document.documentElement.className = `${theme}-html`
   }
 
   function addTodo() {

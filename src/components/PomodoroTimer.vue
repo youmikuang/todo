@@ -25,7 +25,7 @@ const {
   saveData
 } = usePomodoro()
 
-const { currentTheme, selectedTask, selectedTaskId, todos } = useTodo()
+const { currentTheme, selectedTask, selectedTaskId, todos, themeColors, setThemeColor } = useTodo()
 
 // 计算进度百分比 (0-100)
 const progress = computed(() => {
@@ -122,8 +122,6 @@ function handleClick() {
   selectedMinutes.value = currentMinutes.value
   selectedSeconds.value = currentSeconds.value
   isEditing.value = true
-  // 防止背景滚动
-  document.body.style.overflow = 'hidden'
   nextTick(() => {
     scrollToSelected()
   })
@@ -186,7 +184,10 @@ function handleScroll(type) {
 // 关闭选择器
 function closePicker() {
   isEditing.value = false
-  document.body.style.overflow = ''
+  // 强制刷新状态栏颜色
+  setTimeout(() => {
+    setThemeColor(themeColors[currentTheme.value])
+  }, 50)
 }
 
 // 确认选择
