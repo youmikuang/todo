@@ -18,6 +18,16 @@ const originalTitle = 'Todo'
 // Web Worker 用于后台计时
 let timerWorker = null
 
+// 预加载的音频对象，用于解决后台标签页无法播放的问题
+let preloadedAudio = null
+
+function preloadAudio() {
+  if (!preloadedAudio) {
+    preloadedAudio = new Audio('/Cuckoo.mp3')
+    preloadedAudio.load()
+  }
+}
+
 function getTimerWorker() {
   if (!timerWorker) {
     const workerCode = `
@@ -186,6 +196,9 @@ export function usePomodoro() {
     }
     isRunning.value = true
 
+    // 在用户交互时预加载音频，确保后台也能播放
+    preloadAudio()
+
     // 计算结束时间
     const totalSeconds = minutes.value * 60 + seconds.value
     endTime = Date.now() + totalSeconds * 1000
@@ -245,8 +258,14 @@ export function usePomodoro() {
   function playSound() {
     if (!soundEnabled.value) return
     try {
-      const audio = new Audio('/Cuckoo.mp3')
-      audio.play()
+      // 使用预加载的音频对象播放，确保后台标签页也能正常播放
+      if (preloadedAudio) {
+        preloadedAudio.currentTime = 0
+        preloadedAudio.play()
+      } else {
+        const audio = new Audio('/Cuckoo.mp3')
+        audio.play()
+      }
     } catch (e) {
       // 静默失败
     }
@@ -314,6 +333,9 @@ export function usePomodoro() {
           seconds.value = totalSeconds % 60
           endTime = data.endTime
           isRunning.value = true
+
+          // 预加载音频
+          preloadAudio()
 
           // 添加页面可见性监听
           document.addEventListener('visibilitychange', handleVisibilityChange)
