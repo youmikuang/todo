@@ -5,6 +5,25 @@ const currentTheme = ref('light')
 const todos = ref([])
 const selectedTaskId = ref(null)
 
+// 解析 todo 名称中的目标番茄钟数 (例如 "mysql * 3" 返回 3)
+export function parseTargetPomodoros(text) {
+  const match = text.match(/\*\s*(\d+)\s*$/)
+  if (match) {
+    return parseInt(match[1], 10)
+  }
+  return null
+}
+
+// 获取 todo 的进度百分比
+export function getTodoProgress(todo, taskStats) {
+  const target = parseTargetPomodoros(todo.text)
+  if (!target || target <= 0) return null
+
+  const completed = taskStats?.count || 0
+  const progress = Math.min(100, Math.round((completed / target) * 100))
+  return progress
+}
+
 // 模块加载时初始化数据
 function initData() {
   // 加载主题
@@ -148,6 +167,8 @@ export function useTodo() {
     deleteTodo,
     selectTask,
     getTodoClass,
-    init
+    init,
+    parseTargetPomodoros,
+    getTodoProgress
   }
 }

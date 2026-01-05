@@ -396,6 +396,38 @@ button.darker-button:hover {
     transition: all 200ms ease-in-out;
     cursor: pointer;
     box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 进度背景层样式 */
+.todo-progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    border-radius: 15px 0 0 15px;
+    transition: width 0.3s ease-in-out;
+    z-index: 0;
+}
+
+/* 确保 todo 内容在进度条上层 */
+.todo > *:not(.todo-progress) {
+    position: relative;
+    z-index: 1;
+}
+
+/* 进度背景层主题颜色 */
+.standard-progress {
+    background-color: rgba(255, 107, 107, 0.35);
+}
+
+.light-progress {
+    background-color: rgba(102, 126, 234, 0.3);
+}
+
+.darker-progress {
+    background-color: rgba(0, 210, 255, 0.3);
 }
 
 .todo:hover {
@@ -488,6 +520,10 @@ button.darker-button:hover {
         margin: 0.4rem 0;
         padding: 0.6rem 0.75rem;
         border-radius: 10px;
+    }
+
+    .todo-progress {
+        border-radius: 10px 0 0 10px;
     }
 
     .todo li {

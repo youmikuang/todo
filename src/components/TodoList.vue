@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useTodo } from '@/composables/useTodo'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useTodo, getTodoProgress } from '@/composables/useTodo'
 import { usePomodoro } from '@/composables/usePomodoro'
 
 const {
@@ -8,6 +8,7 @@ const {
   inputValue,
   currentDateTime,
   selectedTaskId,
+  currentTheme,
   inputClass,
   buttonClass,
   titleClass,
@@ -20,9 +21,26 @@ const {
   init
 } = useTodo()
 
-const { getTaskStats, isRunning } = usePomodoro()
+const { getTaskStats, isRunning, pomodoroHistory } = usePomodoro()
 
 const isFullscreen = ref(false)
+
+// 计算每个 todo 的进度
+function getProgress(todo) {
+  const stats = getTaskStats(todo.id)
+  return getTodoProgress(todo, stats)
+}
+
+// 监听番茄钟历史变化，自动完成达到 100% 的 todo
+watch(pomodoroHistory, () => {
+  todos.value.forEach(todo => {
+    if (todo.completed) return
+    const progress = getProgress(todo)
+    if (progress === 100) {
+      toggleComplete(todo)
+    }
+  })
+}, { deep: true })
 
 // 切换全屏
 function toggleFullscreen() {
@@ -97,7 +115,7 @@ onUnmounted(() => {
           :class="inputClass"
           class="todo-input"
           type="text"
-          placeholder="添加一条待办"
+          placeholder="添加一条待办，待办 * 数字 表示番茄钟执行次数。"
         >
         <button :class="['todo-btn', buttonClass]" type="submit">
           <i class="fas fa-plus"></i>
@@ -117,6 +135,13 @@ onUnmounted(() => {
           :class="[getTodoClass(todo), { 'selected-task': selectedTaskId === todo.id, 'disabled': isRunning && selectedTaskId !== todo.id }]"
           @click="handleSelectTask(todo.id)"
         >
+          <!-- 进度背景层 -->
+          <div
+            v-if="getProgress(todo) !== null"
+            class="todo-progress"
+            :class="`${currentTheme}-progress`"
+            :style="{ width: getProgress(todo) + '%' }"
+          ></div>
           <li class="todo-item">
             <span class="todo-text">{{ todo.text }}</span>
             <span v-if="getTaskStats(todo.id).count > 0" class="task-stats">
@@ -184,7 +209,6 @@ onUnmounted(() => {
 
 .disabled {
   cursor: not-allowed !important;
-  opacity: 0.5;
 }
 
 @media only screen and (max-width: 768px) {
