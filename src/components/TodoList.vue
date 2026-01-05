@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useTodo, getTodoProgress } from '@/composables/useTodo'
 import { usePomodoro } from '@/composables/usePomodoro'
 
@@ -15,6 +15,7 @@ const {
   changeTheme,
   addTodo,
   toggleComplete,
+  editTodo,
   deleteTodo,
   selectTask,
   getTodoClass,
@@ -24,6 +25,38 @@ const {
 const { getTaskStats, isRunning, pomodoroHistory } = usePomodoro()
 
 const isFullscreen = ref(false)
+
+// 编辑状态
+const editingTodoId = ref(null)
+const editingText = ref('')
+
+// 双击进入编辑模式
+function handleDoubleClick(todo) {
+  if (isRunning.value) return
+  editingTodoId.value = todo.id
+  editingText.value = todo.text
+  nextTick(() => {
+    const input = document.querySelector('.edit-input')
+    if (input) {
+      input.focus()
+      input.select()
+    }
+  })
+}
+
+// 保存编辑
+function saveEdit(todo) {
+  if (editTodo(todo, editingText.value)) {
+    editingTodoId.value = null
+    editingText.value = ''
+  }
+}
+
+// 取消编辑
+function cancelEdit() {
+  editingTodoId.value = null
+  editingText.value = ''
+}
 
 // 计算每个 todo 的进度
 function getProgress(todo) {
@@ -70,6 +103,15 @@ function handleFullscreenChange() {
   isFullscreen.value = !!(document.fullscreenElement || document.webkitFullscreenElement)
 }
 
+// 键盘快捷键
+function handleKeydown(e) {
+  // 如果在输入框中，不触发快捷键
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+  if (e.key === 'f' || e.key === 'F') {
+    toggleFullscreen()
+  }
+}
+
 // 计时中不允许切换任务
 function handleSelectTask(taskId) {
   if (isRunning.value) return
@@ -86,11 +128,13 @@ onMounted(() => {
   init()
   document.addEventListener('fullscreenchange', handleFullscreenChange)
   document.addEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.addEventListener('keydown', handleKeydown)
 })
 
 onUnmounted(() => {
   document.removeEventListener('fullscreenchange', handleFullscreenChange)
   document.removeEventListener('webkitfullscreenchange', handleFullscreenChange)
+  document.removeEventListener('keydown', handleKeydown)
 })
 </script>
 
@@ -143,7 +187,18 @@ onUnmounted(() => {
             :style="{ width: getProgress(todo) + '%' }"
           ></div>
           <li class="todo-item">
-            <span class="todo-text">{{ todo.text }}</span>
+            <input
+              v-if="editingTodoId === todo.id"
+              v-model="editingText"
+              class="edit-input"
+              :class="inputClass"
+              type="text"
+              @blur="saveEdit(todo)"
+              @keyup.enter="saveEdit(todo)"
+              @keyup.escape="cancelEdit"
+              @click.stop
+            >
+            <span v-else class="todo-text" @dblclick.stop="handleDoubleClick(todo)">{{ todo.text }}</span>
             <span v-if="getTaskStats(todo.id).count > 0" class="task-stats">
               <i class="fas fa-clock"></i> {{ getTaskStats(todo.id).count }}
             </span>
@@ -191,6 +246,18 @@ onUnmounted(() => {
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  cursor: text;
+}
+
+.edit-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0.2rem 0.5rem;
+  font-size: inherit;
+  font-family: inherit;
+  border: none;
+  border-radius: 5px;
+  outline: none;
 }
 
 .task-stats {

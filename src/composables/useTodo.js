@@ -116,6 +116,13 @@ export function useTodo() {
     saveTodos()
   }
 
+  function editTodo(todo, newText) {
+    if (!newText.trim()) return false
+    todo.text = newText.trim()
+    saveTodos()
+    return true
+  }
+
   function deleteTodo(todo) {
     todo.falling = true
     if (selectedTaskId.value === todo.id) {
@@ -164,6 +171,7 @@ export function useTodo() {
     changeTheme,
     addTodo,
     toggleComplete,
+    editTodo,
     deleteTodo,
     selectTask,
     getTodoClass,
