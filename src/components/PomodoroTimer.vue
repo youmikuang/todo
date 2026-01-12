@@ -535,11 +535,12 @@ onMounted(() => {
   background: none;
   border: none;
   font-size: 1rem;
-  opacity: 0.5;
+  opacity: 0.7;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   margin-left: 0.5rem;
   transition: opacity 0.2s, transform 0.2s;
+  color: inherit;
 }
 
 .export-btn:hover {
