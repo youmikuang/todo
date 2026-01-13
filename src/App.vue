@@ -190,7 +190,7 @@ html:-webkit-full-screen .todo-collapsed .chart-wrapper {
 html:fullscreen .todo-collapsed .current-task,
 html:-webkit-full-screen .todo-collapsed .current-task {
   font-size: 3.5rem;
-  color: #000000;
+  color: inherit;
 }
 
 html:fullscreen .todo-collapsed .pomodoro-controls,
