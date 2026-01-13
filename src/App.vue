@@ -170,4 +170,37 @@ const toggleTodoCollapse = () => {
 .app-container.darker {
   background-color: transparent !important;
 }
+
+/* 全屏 + 折叠 todo 时的样式 */
+html:fullscreen .todo-collapsed .pomodoro-timer,
+html:-webkit-full-screen .todo-collapsed .pomodoro-timer {
+  transform: scale(2);
+  transform-origin: center top;
+  margin-bottom: 17rem;
+}
+
+html:fullscreen .todo-collapsed .pomodoro-stats,
+html:fullscreen .todo-collapsed .chart-wrapper,
+html:-webkit-full-screen .todo-collapsed .pomodoro-stats,
+html:-webkit-full-screen .todo-collapsed .chart-wrapper {
+  display: none !important;
+}
+
+
+html:fullscreen .todo-collapsed .current-task,
+html:-webkit-full-screen .todo-collapsed .current-task {
+  font-size: 3.5rem;
+  color: #000000;
+}
+
+html:fullscreen .todo-collapsed .pomodoro-controls,
+html:-webkit-full-screen .todo-collapsed .pomodoro-controls {
+  margin-bottom: 0;
+}
+
+html:fullscreen .todo-collapsed .pomodoro,
+html:-webkit-full-screen .todo-collapsed .pomodoro {
+  justify-content: center;
+  padding-top: 0;
+}
 </style>
