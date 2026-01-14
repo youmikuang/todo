@@ -3,10 +3,11 @@ import { ref, onMounted, onUnmounted, watch, nextTick } from 'vue'
 import { useTodo, getTodoProgress } from '@/composables/useTodo'
 import { usePomodoro } from '@/composables/usePomodoro'
 
+const emit = defineEmits(['fullscreen-change'])
+
 const {
   todos,
   inputValue,
-  currentDateTime,
   selectedTaskId,
   currentTheme,
   inputClass,
@@ -80,19 +81,15 @@ function toggleFullscreen() {
   const elem = document.documentElement
 
   if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-    // 进入全屏
     if (elem.requestFullscreen) {
       elem.requestFullscreen()
     } else if (elem.webkitRequestFullscreen) {
-      // Safari / iOS
       elem.webkitRequestFullscreen()
     }
   } else {
-    // 退出全屏
     if (document.exitFullscreen) {
       document.exitFullscreen()
     } else if (document.webkitExitFullscreen) {
-      // Safari / iOS
       document.webkitExitFullscreen()
     }
   }
@@ -100,12 +97,17 @@ function toggleFullscreen() {
 
 // 监听全屏状态变化
 function handleFullscreenChange() {
+  const wasFullscreen = isFullscreen.value
   isFullscreen.value = !!(document.fullscreenElement || document.webkitFullscreenElement)
+  if (!wasFullscreen && isFullscreen.value) {
+    emit('fullscreen-change', true)
+  } else if (wasFullscreen && !isFullscreen.value) {
+    emit('fullscreen-change', false)
+  }
 }
 
 // 键盘快捷键
 function handleKeydown(e) {
-  // 如果在输入框中，不触发快捷键
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
   if (e.key === 'f' || e.key === 'F') {
     toggleFullscreen()
@@ -145,7 +147,7 @@ onUnmounted(() => {
         <div class="standard-theme theme-selector" @click="changeTheme('standard')"></div>
         <div class="light-theme theme-selector" @click="changeTheme('light')"></div>
         <div class="darker-theme theme-selector" @click="changeTheme('darker')"></div>
-        <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏' : '全屏'">
+        <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏(F)' : '全屏(F)'">
           <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
         </button>
       </div>
@@ -165,10 +167,6 @@ onUnmounted(() => {
           <i class="fas fa-plus"></i>
         </button>
       </form>
-    </div>
-
-    <div class="datetime-wrapper">
-      <p><span id="datetime">{{ currentDateTime }}</span></p>
     </div>
 
     <div id="myUnOrdList">
@@ -230,6 +228,10 @@ onUnmounted(() => {
   width: 100%;
   padding: 1rem;
   box-sizing: border-box;
+}
+
+#title {
+  margin-top: 3rem;
 }
 
 .todo-item {

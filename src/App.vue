@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import PomodoroTimer from '@/components/PomodoroTimer.vue'
 import TodoList from '@/components/TodoList.vue'
 import { useTodo } from '@/composables/useTodo'
@@ -11,6 +11,56 @@ const isTodoCollapsed = ref(false)
 const toggleTodoCollapse = () => {
   isTodoCollapsed.value = !isTodoCollapsed.value
 }
+
+// 处理全屏变化，进入全屏时折叠 todo，退出全屏时展开 todo
+const handleFullscreenChange = (isFullscreen) => {
+  isTodoCollapsed.value = isFullscreen
+}
+
+// 时间显示功能
+const showClock = ref(true)
+const currentTime = ref('')
+const currentDate = ref('')
+
+const updateTime = () => {
+  const now = new Date()
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
+  currentTime.value = `${hours}:${minutes}:${seconds}`
+
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+  currentDate.value = `${year}/${month}/${day}`
+}
+
+const toggleClock = () => {
+  showClock.value = !showClock.value
+}
+
+// 键盘快捷键
+const handleKeydown = (e) => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+  if (e.key === 'c' || e.key === 'C') {
+    toggleTodoCollapse()
+  }
+}
+
+let clockInterval = null
+
+onMounted(() => {
+  updateTime()
+  clockInterval = setInterval(updateTime, 1000)
+  document.addEventListener('keydown', handleKeydown)
+})
+
+onUnmounted(() => {
+  if (clockInterval) {
+    clearInterval(clockInterval)
+  }
+  document.removeEventListener('keydown', handleKeydown)
+})
 </script>
 
 <template>
@@ -18,11 +68,18 @@ const toggleTodoCollapse = () => {
     <div class="pomodoro-section">
       <PomodoroTimer />
     </div>
-    <button class="collapse-btn" @click="toggleTodoCollapse" :title="isTodoCollapsed ? '展开待办' : '折叠待办'">
+    <button class="collapse-btn" @click="toggleTodoCollapse" :title="isTodoCollapsed ? '展开待办（C）' : '折叠待办（C）'">
       <span class="collapse-icon">{{ isTodoCollapsed ? '◀' : '▶' }}</span>
     </button>
     <div class="todo-section" :class="{ collapsed: isTodoCollapsed }">
-      <TodoList v-show="!isTodoCollapsed" />
+      <TodoList @fullscreen-change="handleFullscreenChange" />
+    </div>
+    <!-- 左下角时钟 -->
+    <div class="clock-wrapper" @click="toggleClock" :title="showClock ? '点击隐藏时间' : '点击显示时间'">
+      <Transition name="clock-fade" mode="out-in">
+        <span v-if="showClock" key="time" class="clock-time">{{ currentDate }} {{ currentTime }}</span>
+        <span v-else key="placeholder" class="clock-placeholder">···</span>
+      </Transition>
     </div>
   </div>
 </template>
@@ -52,6 +109,9 @@ const toggleTodoCollapse = () => {
   align-items: center;
   justify-content: center;
   transition: flex 0.3s ease;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .todo-collapsed .pomodoro-section {
@@ -62,18 +122,18 @@ const toggleTodoCollapse = () => {
   position: absolute;
   right: 40%;
   top: 50%;
-  transform: translate(50%, -50%);
+  transform: translate(50%, -50%) scale(1);
   z-index: 100;
   width: 20px;
   height: 40px;
-  background: inherit;
+  background: rgba(128, 128, 128, 0.1);
   border: 1px solid rgba(128, 128, 128, 0.25);
   border-radius: 10px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background-color 0.2s ease, border-color 0.2s ease, right 0.3s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, right 0.4s ease-in-out, transform 0.4s ease-in-out;
 }
 
 .collapse-btn::before,
@@ -114,7 +174,7 @@ const toggleTodoCollapse = () => {
 
 .todo-collapsed .collapse-btn {
   right: 0;
-  transform: translate(50%, -50%);
+  transform: translate(50%, -50%) scale(1.3);
 }
 
 .todo-collapsed .collapse-btn::before,
@@ -127,12 +187,16 @@ const toggleTodoCollapse = () => {
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  transition: flex 0.3s ease, width 0.3s ease, opacity 0.3s ease;
+  transition: flex 0.4s ease-in-out, width 0.4s ease-in-out, opacity 0.3s ease-in-out, padding 0.4s ease-in-out;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 .todo-section.collapsed {
   flex: 0;
   width: 0;
+  padding: 0;
   overflow: hidden;
   opacity: 0;
 }
@@ -161,6 +225,66 @@ const toggleTodoCollapse = () => {
     padding-top: env(safe-area-inset-top, 0px);
   }
 }
+
+/* 左下角时钟样式 */
+.clock-wrapper {
+  position: fixed;
+  left: 20px;
+  bottom: 20px;
+  z-index: 100;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 12px;
+  transition: all 0.2s ease;
+  user-select: none;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+.clock-time {
+  font-size: 18px;
+  font-family: 'Work Sans', monospace;
+  letter-spacing: 1px;
+  color: inherit;
+}
+
+.clock-placeholder {
+  font-size: 18px;
+  opacity: 0.5;
+  letter-spacing: 2px;
+}
+
+@media only screen and (max-width: 768px) {
+  .clock-wrapper {
+    left: 10px;
+    bottom: 10px;
+    padding: 6px 10px;
+  }
+
+  .clock-time {
+    font-size: 14px;
+  }
+
+  .clock-placeholder {
+    font-size: 14px;
+  }
+}
+
+/* 时钟过渡动画 */
+.clock-fade-enter-active,
+.clock-fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.clock-fade-enter-from {
+  opacity: 0;
+  transform: scale(0.9);
+}
+
+.clock-fade-leave-to {
+  opacity: 0;
+  transform: scale(0.9);
+}
 </style>
 
 <style>
@@ -169,6 +293,32 @@ const toggleTodoCollapse = () => {
 .app-container.light,
 .app-container.darker {
   background-color: transparent !important;
+}
+
+/* 折叠 todo 时的样式 */
+.todo-collapsed .pomodoro-timer {
+  transform: scale(2);
+  transform-origin: center top;
+  margin-bottom: 17rem;
+}
+
+.todo-collapsed .pomodoro-stats,
+.todo-collapsed .chart-wrapper {
+  display: none !important;
+}
+
+.todo-collapsed .current-task {
+  font-size: 3.5rem;
+  color: inherit;
+}
+
+.todo-collapsed .pomodoro-controls {
+  margin-bottom: 0;
+}
+
+.todo-collapsed .pomodoro {
+  justify-content: center;
+  padding-top: 0;
 }
 
 /* 全屏 + 折叠 todo 时的样式 */
