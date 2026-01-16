@@ -3,9 +3,11 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import PomodoroTimer from '@/components/PomodoroTimer.vue'
 import TodoList from '@/components/TodoList.vue'
 import { useTodo } from '@/composables/useTodo'
+import { usePomodoro } from '@/composables/usePomodoro'
 import '@/assets/css/main.css'
 
 const { currentTheme } = useTodo()
+const { toggleTimer } = usePomodoro()
 const isTodoCollapsed = ref(false)
 
 const toggleTodoCollapse = () => {
@@ -42,8 +44,15 @@ const toggleClock = () => {
 // 键盘快捷键
 const handleKeydown = (e) => {
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return
+  // 如果时间选择器打开，忽略快捷键
+  if (document.querySelector('.picker-overlay')) return
   if (e.key === 'c' || e.key === 'C') {
     toggleTodoCollapse()
+  }
+  // 空格键暂停/继续计时器
+  if (e.key === ' ' || e.code === 'Space') {
+    e.preventDefault()
+    toggleTimer()
   }
 }
 
