@@ -205,27 +205,33 @@ body.darker {
 #title.standard-title {
     background-image: linear-gradient(135deg, #ff6b6b, #ffd93d, #ff6b6b);
     border-right-color: #ff6b6b;
-    animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
-        standard-animated-cursor 750ms steps(11,end) infinite;
+    animation: animated-text-cycle 5s steps(22,end) 0.5s infinite normal,
+        standard-animated-cursor 750ms steps(22,end) infinite;
 }
 
 #title.light-title {
     background-image: linear-gradient(135deg, #667eea, #764ba2, #667eea);
     border-right-color: #667eea;
-    animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
-        light-animated-cursor 750ms steps(11,end) infinite;
+    animation: animated-text-cycle 5s steps(22,end) 0.5s infinite normal,
+        light-animated-cursor 750ms steps(22,end) infinite;
 }
 
 #title.darker-title {
     background-image: linear-gradient(135deg, #00d2ff, #3a7bd5, #00d2ff);
     border-right-color: #00d2ff;
-    animation: animated-text 2s steps(11,end) 0.5s 1 normal both,
-        darker-animated-cursor 750ms steps(11,end) infinite;
+    animation: animated-text-cycle 5s steps(22,end) 0.5s infinite normal,
+        darker-animated-cursor 750ms steps(22,end) infinite;
 }
 
 @keyframes animated-text{
     from{width: 0%;}
     to{width: 800px;}
+}
+
+@keyframes animated-text-cycle {
+    0% { width: 0%; }
+    50% { width: 800px; }
+    100% { width: 0%; }
 }
 
 @keyframes standard-animated-cursor{
@@ -554,8 +560,8 @@ button.darker-button:hover {
 
     #title {
         animation:
-            animated-text 3s steps(16,end) 0.5s 1 normal both,
-            animated-cursor 750ms steps(16,end) infinite;
+            animated-text-cycle 6s steps(32,end) 0.5s infinite normal,
+            animated-cursor 750ms steps(32,end) infinite;
         margin-bottom: 10px;
         margin-top: 30px;
         max-width: 330px;
@@ -574,8 +580,8 @@ button.darker-button:hover {
 
     #title {
         animation:
-            animated-text 3.5s steps(16,end) 0.5s 1 normal both,
-            animated-cursor 750ms steps(16,end) infinite;
+            animated-text-cycle 6s steps(32,end) 0.5s infinite normal,
+            animated-cursor 750ms steps(32,end) infinite;
         max-width: 255px;
     }
 }
