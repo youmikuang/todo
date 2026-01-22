@@ -1,7 +1,6 @@
 import { ref, computed, watch } from 'vue'
 import { useTodo } from './useTodo'
 import { formatDisplayTime, formatTotalTime, validateTimeRange } from '@/utils/timeUtils'
-import { getProgressGradient, getPickerTheme } from '@/utils/themeConfig'
 import { loadFromStorage, saveToStorage, validateStorageData } from '@/utils/storageUtils'
 import { playSound, preloadAudio } from '@/utils/audioUtils'
 import { calculateRemainingTime, getRemainingMinutesSeconds, calculateElapsedSeconds, calculateEndTime, shouldResumeTimer, isTimerComplete } from '@/utils/timerLogic'
@@ -21,6 +20,7 @@ const initialSeconds = ref(0)
 let endTime = null
 const originalTitle = 'Todo'
 let timerWorker = null
+let currentSelectedTaskId = null
 
 /**
  * 获取或创建 Web Worker
@@ -119,6 +119,53 @@ function handleVisibilityChange() {
 }
 
 /**
+ * 保存数据到 localStorage
+ */
+function saveData() {
+  const data = {
+    completedPomodoros: completedPomodoros.value,
+    totalFocusTime: totalFocusTime.value,
+    history: pomodoroHistory.value,
+    soundEnabled: soundEnabled.value,
+    initialMinutes: initialMinutes.value,
+    initialSeconds: initialSeconds.value,
+    currentMinutes: minutes.value,
+    currentSeconds: seconds.value,
+    wasRunning: isRunning.value,
+    endTime: endTime
+  }
+  saveToStorage(data)
+}
+
+/**
+ * 完成计时
+ */
+function complete() {
+  // 暂停计时
+  isRunning.value = false
+  const worker = getTimerWorker()
+  worker.postMessage({ type: 'stop' })
+  endTime = null
+
+  completedPomodoros.value++
+
+  const duration = initialMinutes.value * 60 + initialSeconds.value
+  pomodoroHistory.value.push({
+    timestamp: Date.now(),
+    duration: duration,
+    taskId: currentSelectedTaskId || null
+  })
+
+  playSound(soundEnabled.value)
+
+  // 重置时间
+  minutes.value = initialMinutes.value
+  seconds.value = initialSeconds.value
+  updateTitle()
+  saveData()
+}
+
+/**
  * 每秒执行的 tick 函数
  */
 function tick() {
@@ -146,6 +193,11 @@ function tick() {
 
 export function usePomodoro() {
   const { selectedTaskId } = useTodo()
+
+  // 同步 selectedTaskId 到模块级变量
+  watch(selectedTaskId, (newVal) => {
+    currentSelectedTaskId = newVal
+  }, { immediate: true })
 
   // 显示时间
   const displayTime = computed(() => formatDisplayTime(minutes.value, seconds.value))
@@ -234,24 +286,7 @@ export function usePomodoro() {
     saveData()
   }
 
-  /**
-   * 完成计时
-   */
-  function complete() {
-    pause()
-    completedPomodoros.value++
 
-    const duration = initialMinutes.value * 60 + initialSeconds.value
-    pomodoroHistory.value.push({
-      timestamp: Date.now(),
-      duration: duration,
-      taskId: selectedTaskId.value || null
-    })
-
-    playSound(soundEnabled.value)
-    reset()
-    saveData()
-  }
 
   /**
    * 切换声音开关
@@ -323,24 +358,7 @@ export function usePomodoro() {
     }
   }
 
-  /**
-   * 保存数据
-   */
-  function saveData() {
-    const data = {
-      completedPomodoros: completedPomodoros.value,
-      totalFocusTime: totalFocusTime.value,
-      history: pomodoroHistory.value,
-      soundEnabled: soundEnabled.value,
-      initialMinutes: initialMinutes.value,
-      initialSeconds: initialSeconds.value,
-      currentMinutes: minutes.value,
-      currentSeconds: seconds.value,
-      wasRunning: isRunning.value,
-      endTime: endTime
-    }
-    saveToStorage(data)
-  }
+
 
   return {
     minutes,

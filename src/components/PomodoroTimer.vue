@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { usePomodoro } from '@/composables/usePomodoro'
 import { useTodo } from '@/composables/useTodo'
 import PomodoroStats from '@/components/PomodoroStats.vue'
@@ -27,7 +27,7 @@ const {
   saveData
 } = usePomodoro()
 
-const { currentTheme, selectedTask, selectedTaskId, todos, themeColors, setThemeColor } = useTodo()
+const { currentTheme, selectedTask, selectedTaskId, todos } = useTodo()
 
 // 计算进度百分比 (0-100)
 const progress = computed(() => {
@@ -68,15 +68,12 @@ function handleClick() {
 function handleConfirmTime() {
   setTime(selectedTime.value.minutes, selectedTime.value.seconds)
   saveData()
+  isEditing.value = false
 }
 
 // 取消时间选择
 function handleCancelTime() {
   isEditing.value = false
-  // 强制刷新状态栏颜色
-  setTimeout(() => {
-    setThemeColor(themeColors[currentTheme.value])
-  }, 50)
 }
 
 // 导出 Excel
