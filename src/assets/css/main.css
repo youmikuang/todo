@@ -29,7 +29,8 @@ html.darker-html {
     background: #001f29;
 }
 
-html, body {
+html,
+body {
     min-height: 100%;
     min-height: 100dvh;
     min-height: -webkit-fill-available;
@@ -90,7 +91,9 @@ body.darker {
     min-height: 100dvh;
 }
 
-#header, #form, #datetime {
+#header,
+#form,
+#datetime {
     margin: 0 1rem;
     width: 100%;
 }
@@ -113,7 +116,7 @@ body.darker {
 
 /* Theme buttons div */
 .flexrow-container {
-    align-items: center;
+    align-items: flex-end;
     align-self: flex-end;
     display: flex;
     justify-content: space-around;
@@ -235,48 +238,76 @@ body.darker {
 #title.standard-title {
     background-image: linear-gradient(135deg, #ff6b6b, #ffd93d, #ff6b6b);
     border-right-color: #ff6b6b;
-    animation: animated-text-cycle 5s steps(22,end) 0.5s infinite normal,
-        standard-animated-cursor 750ms steps(22,end) infinite;
+    animation: animated-text-cycle 5s steps(22, end) 0.5s infinite normal,
+        standard-animated-cursor 750ms steps(22, end) infinite;
 }
 
 #title.light-title {
     background-image: linear-gradient(135deg, #667eea, #764ba2, #667eea);
     border-right-color: #667eea;
-    animation: animated-text-cycle 5s steps(22,end) 0.5s infinite normal,
-        light-animated-cursor 750ms steps(22,end) infinite;
+    animation: animated-text-cycle 5s steps(22, end) 0.5s infinite normal,
+        light-animated-cursor 750ms steps(22, end) infinite;
 }
 
 #title.darker-title {
     background-image: linear-gradient(135deg, #00d2ff, #3a7bd5, #00d2ff);
     border-right-color: #00d2ff;
-    animation: animated-text-cycle 5s steps(22,end) 0.5s infinite normal,
-        darker-animated-cursor 750ms steps(22,end) infinite;
+    animation: animated-text-cycle 5s steps(22, end) 0.5s infinite normal,
+        darker-animated-cursor 750ms steps(22, end) infinite;
 }
 
-@keyframes animated-text{
-    from{width: 0%;}
-    to{width: 800px;}
+@keyframes animated-text {
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: 800px;
+    }
 }
 
 @keyframes animated-text-cycle {
-    0% { width: 0%; }
-    50% { width: 800px; }
-    100% { width: 0%; }
+    0% {
+        width: 0%;
+    }
+
+    50% {
+        width: 800px;
+    }
+
+    100% {
+        width: 0%;
+    }
 }
 
-@keyframes standard-animated-cursor{
-    from{border-right-color: #ff6b6b;}
-    to{border-right-color: transparent;}
+@keyframes standard-animated-cursor {
+    from {
+        border-right-color: #ff6b6b;
+    }
+
+    to {
+        border-right-color: transparent;
+    }
 }
 
-@keyframes light-animated-cursor{
-    from{border-right-color: #667eea;}
-    to{border-right-color: transparent;}
+@keyframes light-animated-cursor {
+    from {
+        border-right-color: #667eea;
+    }
+
+    to {
+        border-right-color: transparent;
+    }
 }
 
 @keyframes darker-animated-cursor {
-    from{border-right-color: #00d2ff;}
-    to{border-right-color: transparent;}
+    from {
+        border-right-color: #00d2ff;
+    }
+
+    to {
+        border-right-color: transparent;
+    }
 }
 
 @media only screen and (min-width: 768px) and (max-width: 1024px) {
@@ -448,7 +479,7 @@ button.darker-button:hover {
 }
 
 /* 确保 todo 内容在进度条上层 */
-.todo > *:not(.todo-progress) {
+.todo>*:not(.todo-progress) {
     position: relative;
     z-index: 1;
 }
@@ -505,7 +536,8 @@ button.darker-button:hover {
     list-style: none;
 }
 
-.check-btn, .delete-btn {
+.check-btn,
+.delete-btn {
     font-size: 12px;
     cursor: pointer;
     width: 28px;
@@ -521,7 +553,8 @@ button.darker-button:hover {
     justify-content: center;
 }
 
-.check-btn:hover, .delete-btn:hover {
+.check-btn:hover,
+.delete-btn:hover {
     opacity: 1;
 }
 
@@ -531,7 +564,8 @@ button.darker-button:hover {
     overflow: hidden;
 }
 
-.fa-trash, .fa-check {
+.fa-trash,
+.fa-check {
     pointer-events: none;
 }
 
@@ -566,7 +600,8 @@ button.darker-button:hover {
         font-size: 13px;
     }
 
-    .check-btn, .delete-btn {
+    .check-btn,
+    .delete-btn {
         width: 26px;
         height: 26px;
         min-width: 26px;
@@ -578,20 +613,22 @@ button.darker-button:hover {
 
 @media only screen and (max-width: 1000px) {
     .flexrow-container {
-        align-self: unset;
-        margin-right: 0;
+        align-self: flex-end;
+        margin-right: 30px;
+        justify-content: flex-end;
     }
 }
 
 @media only screen and (max-width: 800px) {
     #header {
         font-size: 1rem;
+        padding-top: 2rem;
     }
 
     #title {
         animation:
-            animated-text-cycle 6s steps(32,end) 0.5s infinite normal,
-            animated-cursor 750ms steps(32,end) infinite;
+            animated-text-cycle 6s steps(32, end) 0.5s infinite normal,
+            animated-cursor 750ms steps(32, end) infinite;
         margin-bottom: 10px;
         margin-top: 30px;
         max-width: 330px;
@@ -604,14 +641,14 @@ button.darker-button:hover {
         font-size: 1.5rem !important;
     }
 
-    h1{
+    h1 {
         font-size: 1.5rem !important;
     }
 
     #title {
         animation:
-            animated-text-cycle 6s steps(32,end) 0.5s infinite normal,
-            animated-cursor 750ms steps(32,end) infinite;
+            animated-text-cycle 6s steps(32, end) 0.5s infinite normal,
+            animated-cursor 750ms steps(32, end) infinite;
         max-width: 255px;
     }
 }
@@ -636,12 +673,12 @@ button.darker-button:hover {
 .light .control-btn {
     background-color: white;
     color: #1a150e;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .light .control-btn:hover {
     background-color: #f0f0f0;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .darker .control-btn {
@@ -673,7 +710,7 @@ button.darker-button:hover {
 .light .tab-btn.active {
     background-color: white;
     color: #1a150e;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .darker .tab-btn {
@@ -705,7 +742,7 @@ button.darker-button:hover {
 .light .metric-btn.active {
     background-color: white;
     color: #1a150e;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .darker .metric-btn {
