@@ -22,6 +22,41 @@ const originalTitle = 'Todo'
 let timerWorker = null
 let currentSelectedTaskId = null
 
+// 模块加载时初始化数据
+function initPomodoroData() {
+  const saved = loadFromStorage()
+  if (saved && validateStorageData(saved)) {
+    completedPomodoros.value = saved.completedPomodoros ?? 0
+    totalFocusTime.value = saved.totalFocusTime ?? 0
+    pomodoroHistory.value = saved.history || []
+    soundEnabled.value = saved.soundEnabled !== undefined ? saved.soundEnabled : true
+    // 使用 ?? 运算符，只有当值为 null 或 undefined 时才使用默认值，0 不会触发默认值
+    const loadedInitialMinutes = saved.initialMinutes !== undefined ? saved.initialMinutes : 25
+    const loadedInitialSeconds = saved.initialSeconds ?? 0
+    const loadedCurrentMinutes = saved.currentMinutes !== undefined ? saved.currentMinutes : loadedInitialMinutes
+    const loadedCurrentSeconds = saved.currentSeconds ?? loadedInitialSeconds
+
+    // 如果加载的时间为 0:00，使用默认值 25 分钟
+    if (loadedInitialMinutes === 0 && loadedInitialSeconds === 0) {
+      initialMinutes.value = 25
+      initialSeconds.value = 0
+    } else {
+      initialMinutes.value = loadedInitialMinutes
+      initialSeconds.value = loadedInitialSeconds
+    }
+
+    if (loadedCurrentMinutes === 0 && loadedCurrentSeconds === 0) {
+      minutes.value = initialMinutes.value
+      seconds.value = initialSeconds.value
+    } else {
+      minutes.value = loadedCurrentMinutes
+      seconds.value = loadedCurrentSeconds
+    }
+  }
+}
+
+initPomodoroData()
+
 /**
  * 获取或创建 Web Worker
  */
@@ -309,6 +344,9 @@ export function usePomodoro() {
       minutes.value = m
       seconds.value = s
     }
+
+    // 立即保存到 localStorage
+    saveData()
   }
 
   /**
@@ -318,12 +356,23 @@ export function usePomodoro() {
     const saved = loadFromStorage()
 
     if (saved && validateStorageData(saved)) {
-      completedPomodoros.value = saved.completedPomodoros || 0
-      totalFocusTime.value = saved.totalFocusTime || 0
+      completedPomodoros.value = saved.completedPomodoros ?? 0
+      totalFocusTime.value = saved.totalFocusTime ?? 0
       pomodoroHistory.value = saved.history || []
       soundEnabled.value = saved.soundEnabled !== undefined ? saved.soundEnabled : true
-      initialMinutes.value = saved.initialMinutes || 25
-      initialSeconds.value = saved.initialSeconds || 0
+
+      // 加载并验证时间值
+      const loadedInitialMinutes = saved.initialMinutes !== undefined ? saved.initialMinutes : 25
+      const loadedInitialSeconds = saved.initialSeconds ?? 0
+
+      // 如果初始时间为 0:00，使用默认值 25 分钟
+      if (loadedInitialMinutes === 0 && loadedInitialSeconds === 0) {
+        initialMinutes.value = 25
+        initialSeconds.value = 0
+      } else {
+        initialMinutes.value = loadedInitialMinutes
+        initialSeconds.value = loadedInitialSeconds
+      }
 
       // 检查是否需要恢复计时
       if (shouldResumeTimer(saved.wasRunning, saved.endTime)) {
@@ -347,8 +396,17 @@ export function usePomodoro() {
         worker.postMessage({ type: 'start' })
       } else {
         // 恢复当前计时器状态
-        minutes.value = saved.currentMinutes || initialMinutes.value
-        seconds.value = saved.currentSeconds || initialSeconds.value
+        const loadedCurrentMinutes = saved.currentMinutes !== undefined ? saved.currentMinutes : initialMinutes.value
+        const loadedCurrentSeconds = saved.currentSeconds ?? initialSeconds.value
+
+        // 如果当前时间为 0:00，使用初始时间
+        if (loadedCurrentMinutes === 0 && loadedCurrentSeconds === 0) {
+          minutes.value = initialMinutes.value
+          seconds.value = initialSeconds.value
+        } else {
+          minutes.value = loadedCurrentMinutes
+          seconds.value = loadedCurrentSeconds
+        }
 
         // 如果时间已过期，完成计时
         if (saved.wasRunning && saved.endTime && calculateRemainingTime(saved.endTime) <= 0) {

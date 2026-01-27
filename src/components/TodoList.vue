@@ -13,7 +13,7 @@ const {
   inputClass,
   buttonClass,
   titleClass,
-  changeTheme,
+  toggleTheme,
   addTodo,
   toggleComplete,
   editTodo,
@@ -144,9 +144,12 @@ onUnmounted(() => {
   <div class="todo-container">
     <div id="header">
       <div class="flexrow-container">
-        <div class="standard-theme theme-selector" @click="changeTheme('standard')"></div>
-        <div class="light-theme theme-selector" @click="changeTheme('light')"></div>
-        <div class="darker-theme theme-selector" @click="changeTheme('darker')"></div>
+        <div 
+          class="theme-selector" 
+          :class="`${currentTheme}-theme`"
+          @click="toggleTheme" 
+          title="切换主题"
+        ></div>
         <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏(F)' : '全屏(F)'">
           <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
         </button>

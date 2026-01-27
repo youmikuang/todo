@@ -96,6 +96,13 @@ export function useTodo() {
     document.documentElement.className = `${theme}-html`
   }
 
+  function toggleTheme() {
+    const themes = ['light', 'standard', 'darker']
+    const currentIndex = themes.indexOf(currentTheme.value)
+    const nextIndex = (currentIndex + 1) % themes.length
+    changeTheme(themes[nextIndex])
+  }
+
   function addTodo() {
     if (!inputValue.value.trim()) {
       alert('必须输入内容！')
@@ -169,6 +176,7 @@ export function useTodo() {
     buttonClass,
     titleClass,
     changeTheme,
+    toggleTheme,
     addTodo,
     toggleComplete,
     editTodo,
