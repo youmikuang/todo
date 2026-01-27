@@ -12,15 +12,17 @@ const isTodoCollapsed = ref(false)
 
 const toggleTodoCollapse = () => {
   isTodoCollapsed.value = !isTodoCollapsed.value
+  showClock.value = isTodoCollapsed.value
 }
 
 // 处理全屏变化，进入全屏时折叠 todo，退出全屏时展开 todo
 const handleFullscreenChange = (isFullscreen) => {
   isTodoCollapsed.value = isFullscreen
+  showClock.value = isFullscreen
 }
 
 // 时间显示功能
-const showClock = ref(true)
+const showClock = ref(false)
 const currentTime = ref('')
 const currentDate = ref('')
 
