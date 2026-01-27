@@ -32,6 +32,17 @@ function initData() {
   document.body.className = currentTheme.value
   document.documentElement.className = `${currentTheme.value}-html`
 
+  // 更新 iOS Safari 浏览器 UI 颜色
+  const themeColors = {
+    light: '#d4f1ff',
+    standard: '#062e3f',
+    darker: '#001214'
+  }
+  const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+  if (metaThemeColor) {
+    metaThemeColor.setAttribute('content', themeColors[currentTheme.value] || themeColors.standard)
+  }
+
   // 加载 todos
   const savedTodos = localStorage.getItem('todos')
   if (savedTodos) {
@@ -94,6 +105,17 @@ export function useTodo() {
     localStorage.setItem('savedTheme', theme)
     document.body.className = theme
     document.documentElement.className = `${theme}-html`
+
+    // 更新 iOS Safari 浏览器 UI 颜色
+    const themeColors = {
+      light: '#d4f1ff',
+      standard: '#062e3f',
+      darker: '#001214'
+    }
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]')
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', themeColors[theme] || themeColors.standard)
+    }
   }
 
   function toggleTheme() {

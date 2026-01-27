@@ -224,13 +224,13 @@ onUnmounted(() => {
 
   .pomodoro-section {
     border-top: 1px solid rgba(128, 128, 128, 0.2);
-    flex: 0 0 40%;
+    flex: 0 0 43%;
     min-height: 0;
-    padding-top: 1.5rem;
+    padding-top: 1rem;
   }
 
   .todo-section {
-    flex: 0 0 60%;
+    flex: 0 0 67%;
     min-height: 0;
     overflow-y: auto;
     padding-top: env(safe-area-inset-top, 0px);

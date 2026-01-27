@@ -142,18 +142,16 @@ onUnmounted(() => {
 
 <template>
   <div class="todo-container">
-    <div id="header">
-      <div class="flexrow-container">
-        <div 
-          class="theme-selector" 
-          :class="`${currentTheme}-theme`"
-          @click="toggleTheme" 
-          title="切换主题"
-        ></div>
-        <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏(F)' : '全屏(F)'">
-          <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
-        </button>
-      </div>
+    <div class="flexrow-container">
+      <div 
+        class="theme-selector" 
+        :class="`${currentTheme}-theme`"
+        @click="toggleTheme" 
+        title="切换主题"
+      ></div>
+      <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏(F)' : '全屏(F)'">
+        <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
+      </button>
     </div>
 
     <h1 id="title" :class="titleClass">好好学习，天天向上</h1>
@@ -286,6 +284,7 @@ onUnmounted(() => {
 @media only screen and (max-width: 768px) {
   .todo-container {
     padding: 0.75rem;
+    margin-top: 4rem;
   }
 
   .todo-item {

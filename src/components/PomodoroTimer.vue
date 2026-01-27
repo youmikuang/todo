@@ -206,8 +206,7 @@ onMounted(() => {
 
 @media only screen and (max-width: 768px) {
   .pomodoro {
-    justify-content: center;
-    padding-top: 2rem;
+    padding-top: 0rem;
   }
 }
 
@@ -343,11 +342,7 @@ onMounted(() => {
   }
 
   .pomodoro-stats {
-    cursor: default;
-  }
-
-  .pomodoro-timer {
-    margin-top: 2rem;
+    display: none;
   }
 
   .time-display {
