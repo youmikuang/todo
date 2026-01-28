@@ -152,6 +152,9 @@ onUnmounted(() => {
       <button class="fullscreen-btn" @click="toggleFullscreen" :title="isFullscreen ? '退出全屏(F)' : '全屏(F)'">
         <i :class="isFullscreen ? 'fas fa-compress' : 'fas fa-expand'"></i>
       </button>
+      <!-- <button class="fullscreen-btn" @click="syncData" title="同步数据" style="font-size: 17px !important;">
+        <i class="fas fa-link"></i>
+      </button> -->
     </div>
 
     <h1 id="title" :class="titleClass">好好学习，天天向上</h1>

@@ -226,7 +226,7 @@ onUnmounted(() => {
     border-top: 1px solid rgba(128, 128, 128, 0.2);
     flex: 0 0 43%;
     min-height: 0;
-    padding-top: 1rem;
+    padding-top: 1.5rem;
   }
 
   .todo-section {
