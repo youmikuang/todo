@@ -274,7 +274,7 @@ export function usePomodoro() {
    */
   function start() {
     if (minutes.value === 0 && seconds.value === 0) {
-      reset()
+      reset(false)
     }
     isRunning.value = true
 
@@ -312,13 +312,18 @@ export function usePomodoro() {
 
   /**
    * 重置计时
+   * @param {boolean} autoStart 是否自动开始
    */
-  function reset() {
+  function reset(autoStart = true) {
     pause()
     minutes.value = initialMinutes.value
     seconds.value = initialSeconds.value
     updateTitle()
     saveData()
+
+    if (autoStart) {
+      start()
+    }
   }
 
 
