@@ -300,7 +300,6 @@ onUnmounted(() => {
 
 <style>
 /* 主题背景色 - 非scoped确保生效 */
-.app-container.standard,
 .app-container.light,
 .app-container.darker {
   background-color: transparent !important;

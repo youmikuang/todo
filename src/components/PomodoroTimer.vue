@@ -243,16 +243,12 @@ onMounted(() => {
   padding: 1rem 2rem;
 }
 
-.standard .timer-border-inner {
+.darker .timer-border-inner {
   background: #062e3f;
 }
 
 .light .timer-border-inner {
   background: #d4f1ff;
-}
-
-.darker .timer-border-inner {
-  background: #001f29;
 }
 
 .time-display {

@@ -3,7 +3,7 @@
  */
 
 export const THEME_COLORS = {
-  standard: {
+  darker: {
     progress: {
       start: '#ff6b6b',
       end: '#ffd93d',
@@ -40,25 +40,6 @@ export const THEME_COLORS = {
     timer: {
       bg: '#d4f1ff'
     }
-  },
-  darker: {
-    progress: {
-      start: '#00d2ff',
-      end: '#3a7bd5',
-      bg: 'rgba(0, 210, 255, 0.15)'
-    },
-    picker: {
-      bg: '#002530',
-      headerBg: '#002530',
-      text: '#ffffff',
-      subText: 'rgba(255,255,255,0.6)',
-      highlight: 'rgba(255,255,255,0.1)',
-      border: 'rgba(255,255,255,0.1)',
-      confirm: '#4db8ff'
-    },
-    timer: {
-      bg: '#001f29'
-    }
   }
 }
 
@@ -66,7 +47,7 @@ export const THEME_COLORS = {
  * 获取指定主题的配置
  */
 export function getThemeConfig(themeName) {
-  return THEME_COLORS[themeName] || THEME_COLORS.standard
+  return THEME_COLORS[themeName] || THEME_COLORS.darker
 }
 
 /**

@@ -26,21 +26,19 @@ export function getTodoProgress(todo, taskStats) {
 
 // 模块加载时初始化数据
 function initData() {
-  // 加载主题
   const savedTheme = localStorage.getItem('savedTheme')
-  currentTheme.value = savedTheme || 'light'
+  currentTheme.value = savedTheme === 'light' ? 'light' : 'darker'
   document.body.className = currentTheme.value
   document.documentElement.className = `${currentTheme.value}-html`
 
   // 更新 iOS Safari 浏览器 UI 颜色
   const themeColors = {
     light: '#d4f1ff',
-    standard: '#062e3f',
-    darker: '#001214'
+    darker: '#062e3f'
   }
   const metaThemeColor = document.querySelector('meta[name="theme-color"]')
   if (metaThemeColor) {
-    metaThemeColor.setAttribute('content', themeColors[currentTheme.value] || themeColors.standard)
+    metaThemeColor.setAttribute('content', themeColors[currentTheme.value] || themeColors.darker)
   }
 
   // 加载 todos
@@ -109,20 +107,17 @@ export function useTodo() {
     // 更新 iOS Safari 浏览器 UI 颜色
     const themeColors = {
       light: '#d4f1ff',
-      standard: '#062e3f',
-      darker: '#001214'
+      darker: '#062e3f'
     }
     const metaThemeColor = document.querySelector('meta[name="theme-color"]')
     if (metaThemeColor) {
-      metaThemeColor.setAttribute('content', themeColors[theme] || themeColors.standard)
+      metaThemeColor.setAttribute('content', themeColors[theme] || themeColors.darker)
     }
   }
 
   function toggleTheme() {
-    const themes = ['light', 'standard', 'darker']
-    const currentIndex = themes.indexOf(currentTheme.value)
-    const nextIndex = (currentIndex + 1) % themes.length
-    changeTheme(themes[nextIndex])
+    const nextTheme = currentTheme.value === 'light' ? 'darker' : 'light'
+    changeTheme(nextTheme)
   }
 
   function addTodo() {

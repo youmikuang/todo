@@ -53,7 +53,7 @@ const metricTabs = [
 // 主题颜色配置
 const themeColors = computed(() => {
   const themes = {
-    standard: {
+    darker: {
       countLine: '#4db8ff',
       countFill: 'rgba(77, 184, 255, 0.2)',
       durationLine: '#ff6b6b',
@@ -68,14 +68,6 @@ const themeColors = computed(() => {
       durationFill: 'rgba(255, 59, 48, 0.1)',
       text: '#1a150e',
       point: '#1a150e'
-    },
-    darker: {
-      countLine: '#4db8ff',
-      countFill: 'rgba(77, 184, 255, 0.2)',
-      durationLine: '#ff6b6b',
-      durationFill: 'rgba(255, 107, 107, 0.2)',
-      text: '#ffffff',
-      point: '#ffffff'
     }
   }
   return themes[currentTheme.value] || themes.light
